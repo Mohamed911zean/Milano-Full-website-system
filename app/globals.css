@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+
+:root {
+  --color-gold: #C9A84C;
+  --color-gold-light: #E8D5A0;
+  --color-gold-dark: #8A6F28;
+  --color-bg-base: #0D0D0D;
+  --color-bg-surface: #1A1A1A;
+  --color-bg-card: #242424;
+  --color-bg-elevated: #2E2E2E;
+  --color-text-primary: #FAFAFA;
+  --color-text-accent: #C9A84C;
+  --color-text-muted: #B0B0B0;
+  --color-text-disabled: #666666;
+  --color-border-default: #2A2A2A;
+  --color-border-gold: #C9A84C44;
+  --font-display: 'Playfair Display', serif;
+  --font-arabic: 'Cairo', sans-serif;
+}
+
+@theme {
+  --color-gold: #C9A84C;
+  --color-gold-light: #E8D5A0;
+  --color-gold-dark: #8A6F28;
+  --color-dark-base: #0D0D0D;
+  --color-dark-surface: #1A1A1A;
+  --color-dark-card: #242424;
+  --color-dark-elevated: #2E2E2E;
+  --color-dark-border: #2A2A2A;
+  --font-display: 'Playfair Display', serif;
+  --font-arabic: 'Cairo', sans-serif;
+}
+
+html {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-arabic);
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  background-color: var(--color-bg-base);
+}
+
+/* Arabic text defaults */
+[dir="rtl"] {
+  font-family: var(--font-arabic);
+  line-height: 1.75;
+}
+
+/* Gold divider utility */
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #C9A84C44, transparent);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gold-dark); }
+
+
+
+.font-urdu {
+ font-family: "Noto Nastaliq Urdu", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.font-fustat {
+   font-family: "Fustat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
