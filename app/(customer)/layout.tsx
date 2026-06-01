@@ -11,13 +11,13 @@ export default async function CustomerLayout({
   const config = await getShopConfig()
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <>
       <Navbar />
       <main className="flex-grow">
         {children}
       </main>
       <Footer config={config} />
       <WhatsAppButton phoneNumber={config.whatsapp_number} />
-    </div>
+    </>
   )
 }

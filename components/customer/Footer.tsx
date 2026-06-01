@@ -1,60 +1,171 @@
-import Link from 'next/link'
-import { ShopConfigValues } from '@/lib/supabase/types'
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Phone, MapPin} from 'lucide-react';
+import { FaInstagram , FaFacebook} from 'react-icons/fa'
+import { ShopConfigValues } from '@/lib/supabase/types';
+
+const NAV_LINKS = [
+  { href: '/', label: 'الرئيسية' },
+  { href: '/shop', label: 'المتجر' },
+  { href: '/about', label: 'من نحن' },
+  { href: '/branches', label: 'فروعنا' },
+];
+
+const SUPPORT_LINKS = [
+  { href: '/contact-us', label: 'اتصل بنا' },
+  { href: '/privacy-policy', label: 'سياسة الخصوصية' },
+  { href: '/terms', label: 'الشروط والأحكام' },
+];
 
 interface FooterProps {
-  config: ShopConfigValues
+  config: ShopConfigValues;
 }
 
 export default function Footer({ config }: FooterProps) {
   return (
-    <footer className="bg-dark-surface border-t border-dark-border mt-auto pt-12 pb-8">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-right">
-          {/* Brand */}
-          <div className="space-y-4">
-            <Link href="/" className="font-display text-4xl font-bold text-gold inline-block">
-              Milano
-            </Link>
-            <p className="text-text-muted text-sm leading-relaxed max-w-xs mx-auto md:mr-0">
-              حلويات راقية من قلب المنصورة، نجمع بين الأصالة والجودة لنقدم لكم تجربة فريدة لا تُنسى.
+    <footer className="bg-bg-deep border-t border-white/5 pt-24 pb-12 relative overflow-hidden">
+      {/* Decorative Gradient Glow */}
+      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-full max-w-4xl h-48 bg-gold/5 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-20 text-right">
+
+          {/* Column 1: Brand */}
+          <div className="flex flex-col items-start md:items-end">
+            <div className="mb-8">
+              <span className="font-display text-4xl font-bold text-gold tracking-widest">MILANO</span>
+              <span className="block text-[10px] tracking-[0.4em] font-light uppercase text-white/60 text-center">Sweets</span>
+            </div>
+            <p className="text-text-secondary text-sm leading-relaxed mb-10 max-w-xs font-light">
+              نصنع لكم أجمل الذكريات مع كل قطعة حلوى، بجودة عالمية ولمسة مصرية أصيلة من قلب المنصورة.
             </p>
+            <div className="flex gap-5">
+              <a
+                href="#"
+                className="w-11 h-11 rounded-full border border-gold-border/40 flex items-center justify-center text-gold hover:bg-gold hover:text-text-on-gold hover:shadow-gold transition-all duration-500 ease-premium group"
+              >
+                <FaFacebook className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </a>
+              <a
+                href="#"
+                className="w-11 h-11 rounded-full border border-gold-border/40 flex items-center justify-center text-gold hover:bg-gold hover:text-text-on-gold hover:shadow-gold transition-all duration-500 ease-premium group"
+              >
+                <FaInstagram className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </a>
+              <a
+                href={`https://wa.me/${config.whatsapp_number.replace(/\D/g, '')}`}
+                className="w-11 h-11 rounded-full border border-gold-border/40 flex items-center justify-center text-gold hover:bg-gold hover:text-text-on-gold hover:shadow-gold transition-all duration-500 ease-premium group"
+              >
+                <Phone className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </a>
+            </div>
           </div>
 
-          {/* Contact Info */}
-          <div className="space-y-4">
-            <h4 className="text-gold font-bold text-lg">تواصل معنا</h4>
-            <ul className="space-y-2 text-text-muted text-sm">
-              <li>{config.address}</li>
-              <li>الهاتف: {config.shop_phone}</li>
-              <li>واتساب: {config.whatsapp_number}</li>
+          {/* Column 2: Quick Links */}
+          <div>
+            <h4 className="text-text-primary font-bold mb-8 uppercase tracking-[0.2em] text-[11px]">
+              روابط سريعة
+            </h4>
+            <ul className="flex flex-col gap-5">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-text-muted hover:text-gold transition-colors duration-300 text-sm font-medium tracking-wide"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-gold font-bold text-lg">روابط سريعة</h4>
-            <ul className="space-y-2 text-text-muted text-sm">
-              <li>
-                <Link href="/" className="hover:text-gold transition-colors">الرئيسية</Link>
+          {/* Column 3: Support */}
+          <div>
+            <h4 className="text-text-primary font-bold mb-8 uppercase tracking-[0.2em] text-[11px]">
+              الدعم والمساعدة
+            </h4>
+            <ul className="flex flex-col gap-5">
+              {SUPPORT_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-text-muted hover:text-gold transition-colors duration-300 text-sm font-medium tracking-wide"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Contact */}
+          <div>
+            <h4 className="text-text-primary font-bold mb-8 uppercase tracking-[0.2em] text-[11px]">
+              تواصل معنا
+            </h4>
+            <ul className="flex flex-col gap-6">
+              <li className="flex items-start justify-end gap-4 text-text-secondary text-sm group">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] uppercase tracking-widest text-text-fade font-bold">
+                    اتصل بنا
+                  </span>
+                  <a href={`tel:${config.shop_phone}`} className="hover:text-gold transition-colors font-medium" dir="ltr">
+                    {config.shop_phone}
+                  </a>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gold-subtle/30 flex items-center justify-center text-gold shrink-0 group-hover:bg-gold group-hover:text-text-on-gold transition-all duration-500">
+                  <Phone className="w-4 h-4" />
+                </div>
               </li>
-              <li>
-                <Link href="/products" className="hover:text-gold transition-colors">المنيو</Link>
-              </li>
-              <li>
-                <Link href="/track-order" className="hover:text-gold transition-colors">تتبع طلبك</Link>
+              <li className="flex items-start justify-end gap-4 text-text-secondary text-sm group">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] uppercase tracking-widest text-text-fade font-bold">
+                    موقعنا
+                  </span>
+                  <span className="font-medium">
+                    {config.address}
+                  </span>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gold-subtle/30 flex items-center justify-center text-gold shrink-0 group-hover:bg-gold group-hover:text-text-on-gold transition-all duration-500">
+                  <MapPin className="w-4 h-4" />
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-dark-border text-center">
-          <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent mx-auto mb-6" />
-          <p className="text-text-disabled text-xs">
-            جميع الحقوق محفوظة © {new Date().getFullYear()} Milano Sweets
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row-reverse items-center justify-between gap-8 text-center md:text-right">
+          <p className="text-text-fade text-[11px] font-medium tracking-wider uppercase flex items-center gap-2 flex-wrap justify-center">
+            © 2026 Milano Sweets · جميع الحقوق محفوظة
+            <span className="text-white/20">|</span>
+            <a
+              href="#"
+              className="text-gold hover:text-white transition-all duration-300 font-bold tracking-[0.2em]"
+            >
+              MADE BY MILANO TEAM
+            </a>
           </p>
+
+          <div className="flex gap-8">
+            <Link
+              href="/privacy-policy"
+              className="text-text-fade hover:text-gold transition-colors text-[11px] font-bold uppercase tracking-widest"
+            >
+              الخصوصية
+            </Link>
+            <Link
+              href="/terms"
+              className="text-text-fade hover:text-gold transition-colors text-[11px] font-bold uppercase tracking-widest"
+            >
+              الشروط
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }

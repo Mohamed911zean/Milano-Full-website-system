@@ -12,6 +12,9 @@ import type { CreateOrderInput } from '@/lib/schemas/order'
 export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const supabase = await createClient()
 
+  // جيب الـ user_id لو authenticated
+  const { data: { user } } = await supabase.auth.getUser()
+
   // احسب الـ subtotal
   const subtotal = input.items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
@@ -44,6 +47,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
       subtotal,
       delivery_fee:     deliveryFee,
       customer_notes:   input.customerNotes ?? null,
+      user_id:          user?.id || null, // Link to user if logged in
     })
     .select()
     .single()
@@ -69,6 +73,29 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   if (itemsError) throw new Error(`Failed to create order items: ${itemsError.message}`)
 
   return order
+}
+
+// ============================================================
+// Customer: جلب طلبات المستخدم
+// ============================================================
+
+export async function getUserOrders(): Promise<OrderWithItems[]> {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('orders')
+    .select(`
+      *,
+      items:order_items (*)
+    `)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(`Failed to fetch user orders: ${error.message}`)
+  return data as OrderWithItems[]
 }
 
 // ============================================================

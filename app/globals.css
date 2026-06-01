@@ -1,79 +1,100 @@
 @import "tailwindcss";
 
 
-:root {
-  --color-gold: #C9A84C;
-  --color-gold-light: #E8D5A0;
-  --color-gold-dark: #8A6F28;
-  --color-bg-base: #0D0D0D;
-  --color-bg-surface: #1A1A1A;
-  --color-bg-card: #242424;
-  --color-bg-elevated: #2E2E2E;
-  --color-text-primary: #FAFAFA;
-  --color-text-accent: #C9A84C;
-  --color-text-muted: #B0B0B0;
-  --color-text-disabled: #666666;
-  --color-border-default: #2A2A2A;
-  --color-border-gold: #C9A84C44;
-  --font-display: 'Playfair Display', serif;
-  --font-arabic: 'Cairo', sans-serif;
-}
-
 @theme {
-  --color-gold: #C9A84C;
-  --color-gold-light: #E8D5A0;
-  --color-gold-dark: #8A6F28;
-  --color-dark-base: #0D0D0D;
-  --color-dark-surface: #1A1A1A;
-  --color-dark-card: #242424;
-  --color-dark-elevated: #2E2E2E;
-  --color-dark-border: #2A2A2A;
-  --font-display: 'Playfair Display', serif;
-  --font-arabic: 'Cairo', sans-serif;
+  /* ==================================================
+     MILANO PREMIUM LUXURY SYSTEM
+     Enhanced using Patisserie reference
+  ================================================== */
+
+  /* Background scale */
+  --color-bg-base: #0b0501;
+  --color-bg-deep: #140a04;
+  --color-bg-card: #1f1107;
+  --color-bg-elevated: #2a1709;
+  --color-bg-soft: #35200e;
+  --color-bg-overlay: rgba(11, 5, 1, 0.88);
+
+  /* Gold accent scale */
+  --color-gold: #c9a84c;
+  --color-gold-light: #e8d5a0;
+  --color-gold-bright: #f4e6c1;
+  --color-gold-dark: #8a6f28;
+  --color-gold-muted: rgba(201, 168, 76, 0.22);
+  --color-gold-subtle: rgba(201, 168, 76, 0.1);
+  --color-gold-border: rgba(201, 168, 76, 0.28);
+
+  /* Text scale */
+  --color-text-primary: #fff8ee;
+  --color-text-secondary: #d9b98d;
+  --color-text-muted: #8e7352;
+  --color-text-fade: #64513b;
+  --color-text-on-gold: #120801;
+
+  /* Semantic */
+  --color-border-subtle: rgba(201, 168, 76, 0.14);
+  --color-border-active: rgba(201, 168, 76, 0.55);
+  --color-error: #d14a4a;
+  --color-success: #53a36e;
+
+  /* Fonts */
+  --font-display: 'Playfair Display', 'Cormorant Garamond', serif;
+  --font-body: 'Cairo', 'Jost', system-ui, sans-serif;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 26px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 15px 45px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.03);
+  --shadow-hover: 0 25px 65px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(201, 168, 76, 0.2);
+  --shadow-gold: 0 0 25px rgba(201, 168, 76, 0.18), 0 0 50px rgba(201, 168, 76, 0.08);
+
+  /* Gradients */
+  --background-image-gradient-gold: linear-gradient(135deg, #e8d5a0 0%, #c9a84c 45%, #8a6f28 100%);
+  --background-image-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+
+  /* Motion */
+  --duration-premium: 0.35s;
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-html {
-  background-color: var(--color-bg-base);
-  color: var(--color-text-primary);
-  font-family: var(--font-arabic);
-  height: 100%;
+@layer base {
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  [dir="rtl"] {
+    line-height: 1.75;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg-base); }
+  ::-webkit-scrollbar-thumb { background: var(--color-gold-dark); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-gold); }
 }
 
-body {
-  min-height: 100%;
-  background-color: var(--color-bg-base);
-}
+@layer utilities {
+  .glass-card {
+    background: var(--background-image-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-gold-border);
+  }
 
-/* Arabic text defaults */
-[dir="rtl"] {
-  font-family: var(--font-arabic);
-  line-height: 1.75;
-}
+  .divider-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold-border), transparent);
+  }
 
-/* Gold divider utility */
-.divider-gold {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #C9A84C44, transparent);
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--color-bg-surface); }
-::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-gold-dark); }
-
-
-
-.font-urdu {
- font-family: "Noto Nastaliq Urdu", serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.font-fustat {
-   font-family: "Fustat", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }

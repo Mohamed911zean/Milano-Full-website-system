@@ -24,7 +24,7 @@ The backend foundation (database, service layer, types) is already built in Phas
 
 ## TECH STACK
 
-- Next.js 14 App Router — TypeScript strict mode
+- Next.js 16 App Router — TypeScript strict mode
 - Tailwind CSS — use CSS variables from Design System
 - shadcn/ui — for accessible base components (Dialog, Select, Input, etc.)
 - Zustand — for cart state (client-side only)
