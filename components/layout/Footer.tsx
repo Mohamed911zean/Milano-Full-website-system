@@ -1,17 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Clock3,
-  MapPin,
-  Phone,
-} from "lucide-react";
-
-import {
-  FaInstagram,
-  FaFacebookF,
-} from "react-icons/fa";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+import { ArrowUpRight, Clock3, MapPin, Phone } from "lucide-react";
+import { FaInstagram, FaFacebookF } from "react-icons/fa";
 
 const NAVIGATION = [
   { href: "/", label: "الرئيسية" },
@@ -21,161 +14,136 @@ const NAVIGATION = [
   { href: "/branches", label: "الفروع" },
 ];
 
-export function Footer() {
-  return (
-    <footer className="relative overflow-hidden border-t border-border-subtle bg-bg-base pt-32">
-      {/* Ambient Light */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-gold-border to-transparent" />
+const ease = [0.22, 1, 0.36, 1];
 
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-gold-subtle blur-[140px]" />
+export function Footer() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+
+  return (
+    <footer ref={ref} className="relative overflow-hidden bg-bg-base border-t border-white/5 pt-32 pb-12">
+      {/* Top gold line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-border to-transparent" />
+
+      {/* Ambient */}
+      <div className="absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-gold/5 blur-[160px] pointer-events-none" />
+
+      {/* Giant MILANO watermark */}
+      <div className="absolute inset-0 flex items-end justify-center pointer-events-none select-none overflow-hidden pb-8 opacity-[0.015]">
+        <span className="font-display text-[20vw] font-bold tracking-widest text-white leading-none">MILANO</span>
+      </div>
 
       <div className="container relative z-10">
-        {/* Top Area */}
-        <div className="mb-28 grid gap-20 lg:grid-cols-[1.3fr_0.7fr_0.7fr]">
-          {/* Brand Side */}
-          <div className="max-w-xl">
-            <div className="mb-10">
-              <span className="mb-6 inline-flex items-center rounded-full border border-gold-border bg-gold-subtle px-4 py-2 text-[11px] font-medium uppercase tracking-[0.28em] text-gold-light">
-                Premium Patisserie
-              </span>
 
-              <h2 className="font-display text-[72px] leading-[0.9] tracking-[-0.08em] text-text-primary md:text-[110px]">
-                MILANO
-              </h2>
+        {/* ── Top: brand statement ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 1, ease }}
+          className="mb-20 text-center"
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/50 block mb-4">Premium Patisserie · Since 2010</span>
+          <h2
+            className="font-display font-light text-white tracking-[-0.05em] leading-none mb-6"
+            style={{ fontSize: 'clamp(3rem, 10vw, 8rem)' }}
+          >
+            MILANO
+          </h2>
+          <p className="text-text-muted text-sm leading-relaxed max-w-md mx-auto font-light">
+            نقدم تجربة حلويات فاخرة تمزج بين الحرفية الإيطالية والذوق العصري، مع تفاصيل مصنوعة بعناية تمنح كل زيارة طابعاً استثنائياً.
+          </p>
+        </motion.div>
 
-              <div className="mt-6 h-px w-32 bg-gradient-to-r from-gold-border to-transparent" />
-            </div>
+        {/* ── Divider ── */}
+        <div className="divider-gold mb-20" />
 
-            <p className="max-w-md text-[15px] leading-[2] text-text-muted">
-              نقدم تجربة حلويات فاخرة تمزج بين الحرفية
-              الإيطالية والذوق العصري، مع تفاصيل مصنوعة
-              بعناية تمنح كل زيارة طابعاً استثنائياً.
-            </p>
+        {/* ── Main grid ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-14 lg:gap-10 mb-20 text-right">
 
-            {/* Social */}
-            <div className="mt-10 flex items-center gap-4">
-              <a
-                href="#"
-                className="group flex h-12 w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-card text-text-secondary transition-all duration-premium ease-premium hover:-translate-y-1 hover:border-border-active hover:bg-bg-elevated hover:text-gold"
-              >
-                <FaInstagram className="text-[15px] transition-transform duration-premium group-hover:scale-110" />
+          {/* Brand / Social */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease, delay: 0.1 }}
+          >
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-text-fade mb-8">تابعنا</h4>
+            <div className="flex items-center gap-3 justify-end">
+              <a href="#"
+                className="group w-11 h-11 rounded-full border border-white/8 flex items-center justify-center text-text-fade hover:text-gold hover:border-gold/30 hover:-translate-y-1 transition-all duration-500">
+                <FaInstagram className="w-4 h-4 group-hover:scale-110 transition-transform" />
               </a>
-
-              <a
-                href="#"
-                className="group flex h-12 w-12 items-center justify-center rounded-full border border-border-subtle bg-bg-card text-text-secondary transition-all duration-premium ease-premium hover:-translate-y-1 hover:border-border-active hover:bg-bg-elevated hover:text-gold"
-              >
-                <FaFacebookF className="text-[15px] transition-transform duration-premium group-hover:scale-110" />
+              <a href="#"
+                className="group w-11 h-11 rounded-full border border-white/8 flex items-center justify-center text-text-fade hover:text-gold hover:border-gold/30 hover:-translate-y-1 transition-all duration-500">
+                <FaFacebookF className="w-4 h-4 group-hover:scale-110 transition-transform" />
               </a>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Navigation */}
-          <div>
-            <h3 className="mb-8 text-[11px] font-semibold uppercase tracking-[0.28em] text-text-fade">
-              Navigation
-            </h3>
-
-            <ul className="space-y-5">
+          {/* Nav */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease, delay: 0.2 }}
+          >
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-text-fade mb-8">روابط سريعة</h4>
+            <ul className="flex flex-col gap-4">
               {NAVIGATION.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="group flex items-center justify-between text-[15px] text-text-secondary transition-colors duration-premium hover:text-gold"
+                    className="group flex items-center justify-end gap-2 text-sm text-text-muted hover:text-gold transition-all duration-300"
                   >
                     <span>{item.label}</span>
-
-                    <ArrowUpRight className="h-4 w-4 opacity-0 transition-all duration-premium group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-100" />
+                    <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Contact */}
-          <div>
-            <h3 className="mb-8 text-[11px] font-semibold uppercase tracking-[0.28em] text-text-fade">
-              Contact
-            </h3>
-
-            <div className="space-y-8">
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-border-subtle bg-bg-card text-gold">
-                  <Phone className="h-[17px] w-[17px]" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease, delay: 0.3 }}
+            className="sm:col-span-2"
+          >
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-text-fade mb-8">تواصل معنا</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {[
+                { icon: Phone, label: 'الخط الساخن', value: '01013689991', href: 'tel:01013689991' },
+                { icon: Clock3, label: 'مواعيد العمل', value: 'يومياً 10ص — 12م', href: null },
+                { icon: MapPin, label: 'فروعنا', value: 'المنصورة · طلخا · بلقاس', href: '/branches' },
+              ].map(({ icon: Icon, label, value, href }) => (
+                <div key={label} className="flex items-start gap-3 justify-end text-right group">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-text-fade mb-1">{label}</p>
+                    {href ? (
+                      <a href={href} className="text-sm text-text-secondary hover:text-gold transition-colors duration-300 font-medium" dir="ltr">{value}</a>
+                    ) : (
+                      <p className="text-sm text-text-secondary font-medium">{value}</p>
+                    )}
+                  </div>
+                  <div className="w-9 h-9 rounded-full border border-white/8 flex items-center justify-center text-gold shrink-0 group-hover:bg-gold group-hover:text-text-on-gold transition-all duration-500">
+                    <Icon className="w-4 h-4" />
+                  </div>
                 </div>
-
-                <div>
-                  <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-text-fade">
-                    Hotline
-                  </p>
-
-                  <a
-                    href="tel:01013689991"
-                    dir="ltr"
-                    className="text-[15px] text-text-secondary transition-colors duration-premium hover:text-gold"
-                  >
-                    01013689991
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-border-subtle bg-bg-card text-gold">
-                  <Clock3 className="h-[17px] w-[17px]" />
-                </div>
-
-                <div>
-                  <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-text-fade">
-                    Working Hours
-                  </p>
-
-                  <p className="text-[15px] text-text-secondary">
-                    Daily · 10AM — 12AM
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-border-subtle bg-bg-card text-gold">
-                  <MapPin className="h-[17px] w-[17px]" />
-                </div>
-
-                <div>
-                  <p className="mb-1 text-[11px] uppercase tracking-[0.2em] text-text-fade">
-                    Branches
-                  </p>
-
-                  <p className="text-[15px] text-text-secondary">
-                    Mansoura · Talkha · Belqas
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Divider */}
-        <div className="divider-gold" />
-
-        {/* Bottom Bar */}
-        <div className="flex flex-col items-center justify-between gap-5 py-8 md:flex-row">
-          <p className="text-[12px] tracking-[0.12em] text-text-fade">
-            © 2026 MILANO · ALL RIGHTS RESERVED
+        {/* ── Bottom ── */}
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row-reverse items-center justify-between gap-6">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-text-fade">
+            © 2026 Milano Sweets · All Rights Reserved
           </p>
-
-          <div className="flex items-center gap-8">
-            <Link
-              href="/privacy-policy"
-              className="text-[12px] uppercase tracking-[0.16em] text-text-fade transition-colors duration-premium hover:text-gold"
-            >
-              Privacy
+          <div className="flex gap-8">
+            <Link href="/privacy-policy" className="text-[10px] uppercase tracking-[0.2em] text-text-fade hover:text-gold transition-colors duration-300 font-bold">
+              الخصوصية
             </Link>
-
-            <Link
-              href="/terms"
-              className="text-[12px] uppercase tracking-[0.16em] text-text-fade transition-colors duration-premium hover:text-gold"
-            >
-              Terms
+            <Link href="/terms" className="text-[10px] uppercase tracking-[0.2em] text-text-fade hover:text-gold transition-colors duration-300 font-bold">
+              الشروط
             </Link>
           </div>
         </div>
@@ -183,4 +151,3 @@ export function Footer() {
     </footer>
   );
 }
-``

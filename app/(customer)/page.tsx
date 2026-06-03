@@ -1,12 +1,11 @@
-import { HeroSlider } from "@/components/sections/HeroSlider";
+import  { HeroSlider}  from "@/components/sections/HeroSlider";
 import { CollectionIntro } from "@/components/sections/CollectionIntro";
 import { SpecialCakeCTA } from "@/components/sections/SpecialCakeCTA";
 import { ProductSpotlight } from "@/components/sections/ProductSpotlight";
 import { LegacyStats } from "@/components/sections/LegacyStats";
 import { WhyChooseUs } from "@/components/sections/WhyChooseUs";
 import { BranchesCTA } from "@/components/sections/BranchesCTA";
-import { HomeDynamicSections } from "@/components/sections/HomeDynamicSections";
-import { Footer } from "@/components/layout/Footer";
+
 
 export default function Home() {
   return (

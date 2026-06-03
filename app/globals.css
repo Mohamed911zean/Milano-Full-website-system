@@ -39,6 +39,10 @@
   /* Fonts */
   --font-display: 'Playfair Display', 'Cormorant Garamond', serif;
   --font-body: 'Cairo', 'Jost', system-ui, sans-serif;
+  --font-rouge-script: 'Rouge Script' ;
+  --font-noto-urdu: 'Noto_Nastaliq_Urdu';
+  --font-fustat: 'Fustat'
+
 
   /* Fluid font sizes */
   --font-size-hero: clamp(3.5rem, 8vw, 6.5rem);
@@ -144,3 +148,58 @@
   }
 }
 
+/* ── Custom cursor (desktop) ── */
+@media (pointer: fine) {
+  .cursor-dot,
+  .cursor-ring {
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+    border-radius: 50%;
+  }
+  .cursor-dot {
+    width: 6px; height: 6px;
+    background: var(--color-gold);
+    transition: width 0.3s, height 0.3s, opacity 0.3s;
+  }
+  .cursor-ring {
+    width: 32px; height: 32px;
+    border: 1px solid rgba(201, 168, 76, 0.4);
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                height 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.3s;
+  }
+}
+
+/* ── Page transitions ── */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+main {
+  animation: pageIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Text stat size ── */
+.text-stat {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ── Smooth focus ── */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(201, 168, 76, 0.25);
+  color: var(--color-text-primary);
+}

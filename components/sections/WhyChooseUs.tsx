@@ -15,7 +15,7 @@ const FEATURES = [
   },
   {
     icon: Trophy,
-    title: 'موثوق لأكثر من ١٢ عاماً',
+    title: 'موثوق لأكثر من 14 عاماً',
   },
   {
     icon: Users,
@@ -41,7 +41,7 @@ export function WhyChooseUs() {
               عِش تجربة وفن الحلويات الفاخرة
             </span>
             <h2 className="text-h2 text-text-primary">
-              لماذا تختار لينزا؟
+              لماذا تختار ميلانو ؟
             </h2>
           </motion.div>
         </div>

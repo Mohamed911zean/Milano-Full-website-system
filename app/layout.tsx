@@ -17,6 +17,26 @@ const playfair = Playfair_Display({
   variable: "--font-display",
 });
 
+const font_fustat = Fustat({
+  subsets: ['arabic'],
+  weight: ['400', '700'],
+  display: 'swap',
+  variable: '--font-fustat',
+})
+
+const notoUrdu = Noto_Nastaliq_Urdu({
+  subsets: ['arabic'],
+  weight: ['400', '700'], 
+  display: 'swap',
+  variable: '--font-noto-urdu',
+});
+
+const rougeScript = Rouge_Script({
+    subsets: ['latin'],
+    weight:'400',
+    variable: '--font-rouge-script'
+  })
+
 export const metadata: Metadata = {
   title: "Milano Sweets | حلويات ميلانو",
   description: "حلويات راقية من قلب المنصورة",
@@ -31,7 +51,7 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`${cairo.className} ${playfair.className} h-full antialiased`}
+      className={`${cairo.variable} ${playfair.variable} ${font_fustat.variable}  ${notoUrdu.variable}  ${rougeScript.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg-base text-text-primary selection:bg-gold/30">
         {children}

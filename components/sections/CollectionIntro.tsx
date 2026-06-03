@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { ShoppingBag, Check } from 'lucide-react';
+import { useMotionValue } from 'framer-motion';
+import { useSpring } from 'framer-motion';
 
 const CATEGORIES = [
   'الكل',
@@ -93,6 +95,8 @@ const PRODUCTS = [
   },
 ];
 
+
+
 // السهم متناسق تلقائياً مع اتجاه الـ RTL
 function ArrowIcon() {
   return (
@@ -111,6 +115,12 @@ export function CollectionIntro() {
   const [activeCategory, setActiveCategory] = useState('الكل');
   const [addedMap, setAddedMap] = useState<Record<number, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
+const tiltX = useMotionValue(0);
+const tiltY = useMotionValue(0);
+const stX = useSpring(tiltX, { stiffness: 300, damping: 25 });
+const stY = useSpring(tiltY, { stiffness: 300, damping: 25 });
+
 
   const filteredProducts = activeCategory === 'الكل'
     ? PRODUCTS
@@ -154,7 +164,7 @@ export function CollectionIntro() {
             viewport={{ once: true }}
           >
             <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold mb-4 block">
-              تشكيلة لينزا
+              تشكيلة ميلانو
             </span>
             <h2 className="text-h2 text-text-primary">
               استمتع بعالم من النكهات
@@ -203,20 +213,27 @@ export function CollectionIntro() {
               const isAdded = !!addedMap[product.id];
 
               return (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: (index % 4) * 0.07 }}
-                  className="group"
-                >
-                  <div className={cn(
-                    'relative bg-bg-card rounded-2xl overflow-hidden flex flex-col h-full',
-                    'border border-gold-border/10',
-                    'transition-all duration-500',
-                    'hover:border-gold-border/30 hover:shadow-hover hover:-translate-y-1',
-                    'text-right'
-                  )}>
+               <motion.div
+  key={product.id}
+  style={hovered === product.id ? { rotateX: stY, rotateY: stX, transformStyle: 'preserve-3d' } : {}}
+  onMouseMove={(e) => {
+    if (hovered !== product.id) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    tiltX.set(((e.clientX - rect.left) / rect.width - 0.5) * 12);
+    tiltY.set(-((e.clientY - rect.top) / rect.height - 0.5) * 12);
+  }}
+  onMouseEnter={() => setHovered(product.id)}
+  onMouseLeave={() => { setHovered(null); tiltX.set(0); tiltY.set(0); }}
+  className="group will-change-transform"
+>
+  <div className={cn(
+    'relative bg-bg-card rounded-2xl overflow-hidden flex flex-col h-full',
+    'border transition-all duration-700',
+    hovered === product.id
+      ? 'border-gold/25 shadow-[0_30px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(201,168,76,0.12)]'
+      : 'border-gold-border/10 hover:border-gold-border/20',
+    'text-right'
+  )}>
 
                     {/* ── Image ── */}
                     <div className={cn(
