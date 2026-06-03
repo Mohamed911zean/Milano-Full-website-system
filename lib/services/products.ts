@@ -45,6 +45,22 @@ export async function getProductsByCategory(
   return data as ProductWithVariants[]
 }
 
+export async function getActiveProducts(): Promise<ProductWithVariants[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(`
+      *,
+      variants:product_variants (*)
+    `)
+    .eq('is_active', true)
+    .order('sort_order')
+
+  if (error) throw new Error(`Failed to fetch products: ${error.message}`)
+  return data as ProductWithVariants[]
+}
+
 export async function getFeaturedProducts(): Promise<ProductWithVariants[]> {
   const supabase = await createClient()
 

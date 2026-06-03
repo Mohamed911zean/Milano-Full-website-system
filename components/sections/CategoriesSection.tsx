@@ -10,13 +10,13 @@ const ease = [0.22, 1, 0.36, 1];
 
 // الصور الـ fallback لكل قسم (لحد ما تضيف صور حقيقية في الـ DB)
 const CATEGORY_FALLBACKS: Record<string, string> = {
-  'تورت': '/cake/lotus.jpg',
+  'تورت': '/cakes-category.jpg',
   'جاتوه': '/special-gateau.jpg',
   'حلويات شرقية': '/oriental-category.jpg',
   'مخبوزات': '/bakery.jpg',
   'كافيهات': '/bakery-category.jpg',
-  'شوكليت': '/cake/royal-cake.png',
-  'منيو العيد': '/cakes-category.jpg',
+  'شوكليت': '/chocolate-category.jpg',
+  'منيو العيد': '/kahk.jpg',
   'منيو المناسبات': '/ready-assortments.jpg',
 };
 
