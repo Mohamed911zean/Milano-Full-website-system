@@ -37,7 +37,7 @@ function MagneticCart({ count, onClick, isScrolled }: { count: number; onClick: 
     <motion.button
       ref={ref}
       style={{ x: sx, y: sy }}
-      onMouseMove={(e) => {
+      onMouseMove={(e : React.MouseEvent<HTMLButtonElement>)  => {
         const rect = ref.current?.getBoundingClientRect();
         if (!rect) return;
         x.set((e.clientX - rect.left - rect.width / 2) * 0.4);

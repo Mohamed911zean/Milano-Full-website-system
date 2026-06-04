@@ -216,7 +216,7 @@ const stY = useSpring(tiltY, { stiffness: 300, damping: 25 });
                <motion.div
   key={product.id}
   style={hovered === product.id ? { rotateX: stY, rotateY: stX, transformStyle: 'preserve-3d' } : {}}
-  onMouseMove={(e) => {
+  onMouseMove={(e : React.MouseEvent<HTMLButtonElement>) => {
     if (hovered !== product.id) return;
     const rect = e.currentTarget.getBoundingClientRect();
     tiltX.set(((e.clientX - rect.left) / rect.width - 0.5) * 12);

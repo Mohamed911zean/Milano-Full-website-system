@@ -1,12 +1,17 @@
+// ============================================================
 // lib/services/auth.ts
+// ============================================================
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import type { StaffProfile, StaffRole } from '@/lib/supabase/types'
+import type { StaffProfile, StaffRole, ShopConfigValues } from '@/lib/supabase/types'
 
 export async function getCurrentStaff(): Promise<StaffProfile | null> {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   if (!user) return null
 
   const { data, error } = await supabase
@@ -16,18 +21,20 @@ export async function getCurrentStaff(): Promise<StaffProfile | null> {
     .single()
 
   if (error || !data) return null
+
   return data as StaffProfile
 }
 
 export async function requireOwner(): Promise<StaffProfile> {
   const staff = await getCurrentStaff()
+
   if (!staff || staff.role !== 'owner') {
     throw new Error('Unauthorized: owner access required')
   }
+
   return staff
 }
 
-// Owner بيعمل account للموظف
 export async function createStaffAccount(params: {
   email: string
   password: string
@@ -35,12 +42,10 @@ export async function createStaffAccount(params: {
   role: StaffRole
   createdBy: string
 }): Promise<void> {
-  // يتأكد إن اللي بيعمل الطلب هو owner
   await requireOwner()
 
-  const admin = createAdminClient()
+  const admin = await createAdminClient()
 
-  // اعمل الـ auth user
   const { data: authData, error: authError } =
     await admin.auth.admin.createUser({
       email: params.email,
@@ -48,20 +53,28 @@ export async function createStaffAccount(params: {
       email_confirm: true,
     })
 
-  if (authError) throw new Error(`Failed to create user: ${authError.message}`)
+  if (authError) {
+    throw new Error(`Failed to create user: ${authError.message}`)
+  }
 
-  // اعمل الـ profile
+  if (!authData.user) {
+    throw new Error('Failed to create auth user')
+  }
+
   const supabase = await createClient()
+
   const { error: profileError } = await supabase
     .from('staff_profiles')
     .insert({
-      id:         authData.user.id,
-      full_name:  params.fullName,
-      role:       params.role,
+      id: authData.user.id,
+      full_name: params.fullName,
+      role: params.role,
       created_by: params.createdBy,
     })
 
-  if (profileError) throw new Error(`Failed to create profile: ${profileError.message}`)
+  if (profileError) {
+    throw new Error(`Failed to create profile: ${profileError.message}`)
+  }
 }
 
 export async function toggleStaffActive(
@@ -71,19 +84,22 @@ export async function toggleStaffActive(
   await requireOwner()
 
   const supabase = await createClient()
+
   const { error } = await supabase
     .from('staff_profiles')
-    .update({ is_active: isActive })
+    .update({
+      is_active: isActive,
+    })
     .eq('id', staffId)
 
-  if (error) throw new Error(`Failed to update staff: ${error.message}`)
+  if (error) {
+    throw new Error(`Failed to update staff: ${error.message}`)
+  }
 }
 
 // ============================================================
 // lib/services/config.ts
 // ============================================================
-
-import type { ShopConfigValues } from '@/lib/supabase/types'
 
 export async function getShopConfig(): Promise<ShopConfigValues> {
   const supabase = await createClient()
@@ -92,10 +108,12 @@ export async function getShopConfig(): Promise<ShopConfigValues> {
     .from('shop_config')
     .select('key, value')
 
-  if (error) throw new Error(`Failed to fetch config: ${error.message}`)
+  if (error) {
+    throw new Error(`Failed to fetch config: ${error.message}`)
+  }
 
   return Object.fromEntries(
-    data.map(({ key, value }) => [key, value])
+    data.map((row) => [row.key, row.value])
   ) as ShopConfigValues
 }
 
@@ -105,10 +123,17 @@ export async function updateShopConfig(
 ): Promise<void> {
   await requireOwner()
 
-  const supabase = createClient()
+  const supabase = await createClient()
+
   const { error } = await supabase
     .from('shop_config')
-    .upsert({ key, value, updated_at: new Date().toISOString() })
+    .upsert({
+      key,
+      value,
+      updated_at: new Date().toISOString(),
+    })
 
-  if (error) throw new Error(`Failed to update config: ${error.message}`)
+  if (error) {
+    throw new Error(`Failed to update config: ${error.message}`)
+  }
 }

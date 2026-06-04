@@ -1,16 +1,13 @@
 'use client';
-import { useTranslation } from 'react-i18next';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
-import { useLanguage } from '@/context/LanguageContext';
 
 export function Newsletter() {
-  const { language, t } = useLanguage();
-  const isAr = language === 'ar';
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,7 +22,7 @@ export function Newsletter() {
       <div className="absolute inset-0 z-0">
         <Image
           src="/why-choose-us.jpg"
-          alt={t('sections.newsletter_background')}
+          alt={('sections.newsletter_background')}
           fill
           className="object-cover opacity-10"
         />
@@ -42,13 +39,13 @@ export function Newsletter() {
             viewport={{ once: true }}
           >
             <span className="text-[11px] font-black uppercase tracking-[0.4em] text-gold mb-6 block">
-              {t('sections.stay_enchanted')}
+              {('sections.stay_enchanted')}
             </span>
             <h2 className="text-h2 text-text-primary font-display mb-6">
-              {t('sections.join_the_elite_circle')}
+              {('sections.join_the_elite_circle')}
             </h2>
             <p className="text-text-secondary mb-12 max-w-md mx-auto tracking-wide text-sm">
-              {t('sections.subscribe_to_receive_exclusive')}
+              {('sections.subscribe_to_receive_exclusive')}
             </p>
           </motion.div>
 
@@ -65,10 +62,10 @@ export function Newsletter() {
                 </div>
                 <div className="space-y-2">
                   <h4 className="text-2xl font-display text-text-primary">
-                    {t('sections.thank_you')}
+                    {('sections.thank_you')}
                   </h4>
                   <p className="text-text-muted">
-                    {t('sections.you_ve_successfully_joined_our')}
+                    {('sections.you_ve_successfully_joined_our')}
                   </p>
                 </div>
               </motion.div>
@@ -77,15 +74,14 @@ export function Newsletter() {
                 key="form"
                 exit={{ opacity: 0, y: -20 }}
                 onSubmit={handleSubmit}
-                className={`flex flex-col md:flex-row gap-4 max-w-2xl mx-auto ${t('sections.')}`}
+                className={`flex flex-col md:flex-row gap-4 max-w-2xl mx-auto ${('sections.')}`}
               >
                 <div className="flex-1 group relative">
                   <input
                     type="email"
-                    placeholder={t('sections.email_address')}
+                    placeholder={('sections.email_address')}
                     required
-                    dir={isAr ? 'rtl' : 'ltr'}
-                    className={`w-full bg-bg-card/50 backdrop-blur-md border border-gold-border/20 rounded-full px-8 py-5 text-text-primary focus:outline-none focus:border-gold transition-all duration-300 group-hover:border-gold-border/40 ${t('sections.')}`}
+                    className={`w-full bg-bg-card/50 backdrop-blur-md border border-gold-border/20 rounded-full px-8 py-5 text-text-primary focus:outline-none focus:border-gold transition-all duration-300 group-hover:border-gold-border/40 ${('sections.')}`}
                   />
                   <div className="absolute inset-0 rounded-full bg-gold/5 opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
                 </div>
@@ -96,12 +92,12 @@ export function Newsletter() {
                   className="md:w-52 h-[62px] shadow-gold group"
                 >
                   {status === 'loading'
-                    ? (t('sections.joining'))
+                    ? (('sections.joining'))
                     : (
                       <>
-                        {t('sections.subscribe')}{' '}
-                        <span className={`ml-2 transition-transform duration-500 ${t('sections.group_hover_translate_x_1')} inline-block`}>
-                          {t('sections.')}
+                        {('sections.subscribe')}{' '}
+                        <span className={`ml-2 transition-transform duration-500 ${('sections.group_hover_translate_x_1')} inline-block`}>
+                          {('sections.')}
                         </span>
                       </>
                     )}

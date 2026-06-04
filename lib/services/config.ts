@@ -8,13 +8,11 @@ export async function getShopConfig(): Promise<ShopConfigValues> {
     .from('shop_config')
     .select('key, value')
 
-  if (error) throw new Error(`Failed to fetch shop config: ${error.message}`)
+  if (error) {
+    throw new Error(`Failed to fetch shop config: ${error.message}`)
+  }
 
-  // Convert array of {key, value} to object
-  const config = data.reduce((acc, curr) => {
-    acc[curr.key as keyof ShopConfigValues] = curr.value as any
-    return acc
-  }, {} as ShopConfigValues)
-
-  return config
+  return Object.fromEntries(
+    data.map((item) => [item.key, item.value])
+  ) as ShopConfigValues
 }
