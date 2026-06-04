@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LifeBuoy, Plus, Send, X, AlertCircle, CheckCircle2, Loader2, MessageSquare } from 'lucide-react';
+import { LifeBuoy, Plus, Send, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SectionLabel, GoldDivider } from '@/components/ui/Typography';
-import { createSupportTicket, getUserTickets } from '@/lib/services/support';
+import { createSupportTicket, getUserTickets, type CreateTicketInput } from '@/lib/services/support';
 import { getUserOrders } from '@/lib/services/orders';
 import { cn } from '@/lib/utils';
 
@@ -23,41 +23,52 @@ export default function SupportPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [ticketsData, ordersData] = await Promise.all([
-          getUserTickets(),
-          getUserOrders(),
-        ]);
-        setTickets(ticketsData);
-        setOrders(ordersData);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [ticketsData, ordersData] = await Promise.all([
+        getUserTickets(),
+        getUserOrders(),
+      ]);
+      setTickets(ticketsData);
+      setOrders(ordersData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+
     try {
-      await createSupportTicket({ subject, message, orderId, priority });
+      const input: CreateTicketInput = {
+        subject,
+        message,
+        orderId: orderId || undefined,
+        priority,
+      };
+
+      await createSupportTicket(input);
+      
       setSuccess(true);
+      
       setTimeout(() => {
         setSuccess(false);
         setShowNewTicket(false);
         setSubject('');
         setMessage('');
         setOrderId('');
-        // Refresh tickets
-        getUserTickets().then(setTickets);
+        loadData(); // Refresh tickets
       }, 2000);
-    } catch (error) {
-      alert('حدث خطأ أثناء إرسال التذكرة');
+    } catch (error: any) {
+      alert(error.message || 'حدث خطأ أثناء إرسال التذكرة');
     } finally {
       setSubmitting(false);
     }
@@ -118,10 +129,12 @@ export default function SupportPage() {
                       {ticket.status === 'open' ? 'مفتوحة' : ticket.status === 'resolved' ? 'تم الحل' : 'مغلقة'}
                     </span>
                     <span className="text-[10px] text-text-fade font-bold tracking-widest uppercase">
-                      #{ticket.id.slice(0, 8)}
+                      #{ticket.id?.slice(0, 8)}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-gold transition-colors">{ticket.subject}</h3>
+                  <h3 className="text-lg font-bold text-white group-hover:text-gold transition-colors">
+                    {ticket.subject}
+                  </h3>
                 </div>
                 <span className="text-[10px] text-text-fade font-medium uppercase tracking-widest">
                   {new Date(ticket.created_at).toLocaleDateString('ar-EG')}
@@ -144,18 +157,19 @@ export default function SupportPage() {
               className="absolute inset-0 bg-bg-base/80 backdrop-blur-md"
               onClick={() => !submitting && setShowNewTicket(false)}
             />
+            
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="w-full max-w-2xl bg-bg-card border border-gold-border/20 rounded-3xl p-8 md:p-12 relative z-10 shadow-2xl overflow-hidden"
             >
-              {/* Luxury Shine */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-gold opacity-50" />
-              
+
               <button 
                 onClick={() => setShowNewTicket(false)}
                 className="absolute top-6 right-6 text-text-fade hover:text-gold transition-colors"
+                disabled={submitting}
               >
                 <X className="w-6 h-6" />
               </button>
@@ -166,7 +180,7 @@ export default function SupportPage() {
                     <CheckCircle2 className="w-12 h-12" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-display font-bold text-white">تم إرسال التذكرة</h3>
+                    <h3 className="text-2xl font-display font-bold text-white">تم إرسال التذكرة بنجاح</h3>
                     <p className="text-text-muted text-sm font-light">سيقوم فريق الدعم بالرد عليك في أقرب وقت ممكن</p>
                   </div>
                 </div>
@@ -189,6 +203,7 @@ export default function SupportPage() {
                         className="w-full h-14 bg-white/5 border border-white/10 rounded-xl px-6 text-sm text-white focus:border-gold outline-none transition-all"
                       />
                     </div>
+
                     <div className="space-y-2">
                       <label className="text-[10px] uppercase tracking-widest text-text-fade font-bold px-1">رقم الطلب (اختياري)</label>
                       <select 
@@ -196,10 +211,10 @@ export default function SupportPage() {
                         onChange={(e) => setOrderId(e.target.value)}
                         className="w-full h-14 bg-white/5 border border-white/10 rounded-xl px-6 text-sm text-white focus:border-gold outline-none transition-all appearance-none cursor-pointer"
                       >
-                        <option value="" className="bg-bg-card">لا يوجد</option>
-                        {orders.map(order => (
-                          <option key={order.id} value={order.id} className="bg-bg-card">
-                            {order.order_number} - {new Date(order.created_at).toLocaleDateString()}
+                        <option value="">لا يوجد</option>
+                        {orders.map((order) => (
+                          <option key={order.id} value={order.id}>
+                            {order.order_number} - {new Date(order.created_at).toLocaleDateString('ar-EG')}
                           </option>
                         ))}
                       </select>
@@ -221,14 +236,16 @@ export default function SupportPage() {
                     <div className="flex items-center gap-4">
                       <span className="text-[10px] uppercase tracking-widest text-text-fade font-bold">الأولوية:</span>
                       <div className="flex bg-white/5 rounded-full p-1 border border-white/10">
-                        {['low', 'medium', 'high'].map((p: any) => (
+                        {(['low', 'medium', 'high'] as const).map((p) => (
                           <button
                             key={p}
                             type="button"
                             onClick={() => setPriority(p)}
                             className={cn(
                               "px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all",
-                              priority === p ? "bg-gold text-text-on-gold shadow-sm" : "text-text-fade hover:text-white"
+                              priority === p 
+                                ? "bg-gold text-text-on-gold shadow-sm" 
+                                : "text-text-fade hover:text-white"
                             )}
                           >
                             {p === 'low' ? 'منخفضة' : p === 'medium' ? 'متوسطة' : 'عالية'}
@@ -236,8 +253,11 @@ export default function SupportPage() {
                         ))}
                       </div>
                     </div>
+
                     <Button type="submit" disabled={submitting} className="h-14 px-12">
-                      {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                      {submitting ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
                         <>
                           إرسال <Send className="w-4 h-4 mr-2 rotate-180" />
                         </>

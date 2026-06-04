@@ -1,6 +1,4 @@
 // lib/supabase/server.ts
-// للاستخدام في Server Components و Server Actions و Route Handlers
-
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -21,7 +19,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Server Component — ignore, middleware handles session refresh
+            // ignore
           }
         },
       },
@@ -29,12 +27,11 @@ export async function createClient() {
   )
 }
 
-// Admin client: بس للـ Server Actions اللي محتاجة تعمل user management
-// بيستخدم SERVICE_ROLE_KEY — مش بتحطه في client أبداً
-export function createAdminClient() {
+// Admin Client
+export async function createAdminClient() {
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,  // ← مش NEXT_PUBLIC
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       cookies: {
         getAll: () => [],

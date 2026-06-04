@@ -6,7 +6,6 @@ import { ShoppingBag, ChevronLeft, Calendar, Hash, Loader2 } from 'lucide-react'
 import { SectionLabel, GoldDivider } from '@/components/ui/Typography';
 import { getUserOrders } from '@/lib/services/orders';
 import { OrderWithItems } from '@/lib/supabase/types';
-import OrderStatusBadge from '@/components/customer/OrderStatusBadge';
 import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -69,7 +68,6 @@ export default function OrdersPage() {
               <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start md:items-center">
                 <div className="flex-grow space-y-4">
                   <div className="flex flex-wrap items-center gap-4">
-                    <OrderStatusBadge status={order.status} />
                     <div className="flex items-center gap-2 text-text-fade text-[10px] font-bold uppercase tracking-widest">
                       <Hash className="w-3.5 h-3.5 text-gold" />
                       <span>{order.order_number}</span>
