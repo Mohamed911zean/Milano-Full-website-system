@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { ArrowUpRight, Clock3, MapPin, Phone } from "lucide-react";
 import { FaInstagram, FaFacebookF } from "react-icons/fa";
+import { motion, useInView, type Transition } from "framer-motion";
+
 
 const NAVIGATION = [
   { href: "/", label: "الرئيسية" },
@@ -14,7 +15,7 @@ const NAVIGATION = [
   { href: "/branches", label: "الفروع" },
 ];
 
-const ease = [0.22, 1, 0.36, 1];
+const ease: Transition["ease"] = [0.22, 1, 0.36, 1];
 
 export function Footer() {
   const ref = useRef(null);
