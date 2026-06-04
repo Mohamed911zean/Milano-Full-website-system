@@ -21,7 +21,7 @@ export async function submitOrder(formData: CreateOrderInput) {
       success: true, 
       orderNumber: order.order_number 
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Order submission error:', error)
     return { 
       success: false, 

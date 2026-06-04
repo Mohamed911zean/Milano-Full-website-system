@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Transition } from 'framer-motion';
 import { ShieldCheck, Leaf, Trophy, Users } from 'lucide-react';
+
+const ease: Transition['ease'] = [0.22, 1, 0.36, 1];
 
 const FEATURES = [
   {
@@ -52,7 +54,7 @@ export function WhyChooseUs() {
               key={index}
               initial={{ opacity: 0, scale: 0.85 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: index * 0.1, ease }}
               viewport={{ once: true }}
               className="flex flex-col items-center text-center group"
             >

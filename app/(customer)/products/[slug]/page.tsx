@@ -1,13 +1,13 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import ProductDetailClient from '@/components/sections/ProductDetailClient';
-import type { ProductWithVariants } from '@/lib/supabase/types';
+import type { Category, ProductWithVariants } from '@/lib/supabase/types';
 
 interface Props {
   params: { slug: string };
 }
 
-async function getProduct(id: string): Promise<(ProductWithVariants & { category: any }) | null> {
+async function getProduct(id: string): Promise<(ProductWithVariants & { category: Category | null }) | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('products')
@@ -21,7 +21,7 @@ async function getProduct(id: string): Promise<(ProductWithVariants & { category
     .single();
 
   if (error || !data) return null;
-  return data as any;
+  return data as ProductWithVariants & { category: Category | null };
 }
 
 export default async function ProductPage({ params }: Props) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface LocationContextType {
   city: string;
@@ -13,22 +13,19 @@ interface LocationContextType {
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
-  const [city, setCity] = useState('');
-  const [area, setArea] = useState('');
+  const [{ city, area }, setSavedLocation] = useState(() => {
+    if (typeof window === 'undefined') return { city: '', area: '' };
+    try {
+      const saved = localStorage.getItem('location');
+      return saved ? JSON.parse(saved) as { city: string; area: string } : { city: '', area: '' };
+    } catch {
+      return { city: '', area: '' };
+    }
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('location');
-    if (saved) {
-      const { city, area } = JSON.parse(saved);
-      setCity(city);
-      setArea(area);
-    }
-  }, []);
-
   const setLocation = (c: string, a: string) => {
-    setCity(c);
-    setArea(a);
+    setSavedLocation({ city: c, area: a });
     localStorage.setItem('location', JSON.stringify({ city: c, area: a }));
     setIsModalOpen(false);
   };

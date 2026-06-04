@@ -2,15 +2,27 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, MapPin, X, User, Phone, ExternalLink } from 'lucide-react';
-import { FaSquareFacebook } from "react-icons/fa6";
-import { FaInstagram } from "react-icons/fa";
+import {
+  ShoppingBag,
+  MapPin,
+  X,
+  User,
+  Phone,
+  ExternalLink,
+} from 'lucide-react';
+import { FaSquareFacebook } from 'react-icons/fa6';
+import { FaInstagram } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useSpring,
+  type Transition,
+} from 'framer-motion';
 
 const NAV_LINKS = [
   { href: '/', label: 'الرئيسية', en: 'Home' },
@@ -23,7 +35,7 @@ const NAV_LINKS = [
 
 const MENU_LINK = 'https://l.facebook.com/l.php?u=https%3A%2F%2Fdrive.google.com%2Ffile%2Fd%2F1hC_i31wM25tKTxFXSXIdoT4w3iZpBnfE%2Fview%3Fusp%3Dsharing';
 
-const ease = [0.16, 1, 0.3, 1];
+const ease: Transition['ease'] = [0.16, 1, 0.3, 1];
 
 // ─── Magnetic Cart ────────────────────────────────────────
 function MagneticCart({ count, onClick, isScrolled }: { count: number; onClick: () => void; isScrolled: boolean }) {
@@ -81,7 +93,7 @@ export function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
     const onScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);

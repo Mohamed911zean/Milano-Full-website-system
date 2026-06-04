@@ -5,12 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, EffectFade } from 'swiper/modules';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import type { Swiper as SwiperType } from 'swiper';
+import { motion, AnimatePresence, useMotionValue, useSpring, type Transition } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
 
-const ease = [0.22, 1, 0.36, 1];
+const ease: Transition['ease'] = [0.22, 1, 0.36, 1];
 
 const SLIDES = [
   {
@@ -82,11 +83,11 @@ function MagneticLink({ href, children, className }: { href: string; children: R
 export function HeroSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
-  const swiperRef = useRef<any>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
 
   const slide = SLIDES[activeIndex];
 
-  const handleSlideChange = useCallback((s: any) => {
+  const handleSlideChange = useCallback((s: SwiperType) => {
     setPrevIndex(activeIndex);
     setActiveIndex(s.realIndex);
   }, [activeIndex]);
@@ -100,7 +101,7 @@ export function HeroSlider() {
 
       {/* ── Swiper BG ── */}
       <Swiper
-        onSwiper={(s: any) => (swiperRef.current = s)}
+        onSwiper={(s: SwiperType) => (swiperRef.current = s)}
         modules={[Autoplay, EffectFade]}
         effect="fade"
         fadeEffect={{ crossFade: true }}
@@ -112,7 +113,7 @@ export function HeroSlider() {
       >
         {SLIDES.map((s, index) => (
           <SwiperSlide key={index}>
-            {({ isActive }: any) => (
+            {({ isActive }: { isActive: boolean }) => (
               <div className="relative h-full w-full overflow-hidden">
                 <div
                   className="absolute inset-0 will-change-transform"

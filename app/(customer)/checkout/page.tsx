@@ -33,7 +33,7 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -149,7 +149,7 @@ export default function CheckoutPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
-                    onSubmit={(e : any) => handleNextStep(e, 'shipping')}
+                    onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleNextStep(e, 'shipping')}
                     className="space-y-8"
                   >
                     <div>
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
-                    onSubmit={(e : any) => handleNextStep(e, 'payment')}
+                    onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleNextStep(e, 'payment')}
                     className="space-y-8"
                   >
                     <div>
@@ -290,7 +290,7 @@ export default function CheckoutPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
-                    onSubmit={(e : any) => { e.preventDefault(); handlePlaceOrder(); }}
+                    onSubmit={(e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); handlePlaceOrder(); }}
                     className="space-y-8"
                   >
                     <div>

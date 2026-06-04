@@ -6,10 +6,11 @@ import { User, Phone, Mail, MapPin, Camera, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SectionLabel, GoldDivider } from '@/components/ui/Typography';
 import { createClient } from '@/lib/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -29,7 +30,7 @@ export default function ProfilePage() {
       setLoading(false);
     }
     loadProfile();
-  }, []);
+  }, [supabase.auth]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

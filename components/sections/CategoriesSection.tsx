@@ -3,10 +3,10 @@
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, type Transition } from 'framer-motion';
 import type { Category } from '@/lib/supabase/types';
 
-const ease = [0.22, 1, 0.36, 1];
+const ease: Transition['ease'] = [0.22, 1, 0.36, 1];
 
 // الصور الـ fallback لكل قسم (لحد ما تضيف صور حقيقية في الـ DB)
 const CATEGORY_FALLBACKS: Record<string, string> = {

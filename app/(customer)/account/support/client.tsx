@@ -9,13 +9,21 @@ import { createSupportTicket, type CreateTicketInput } from '@/lib/services/supp
 import { OrderWithItems } from '@/lib/supabase/types';
 import { cn } from '@/lib/utils';
 
+type SupportTicket = {
+  id: string;
+  subject: string;
+  message: string;
+  status: 'open' | 'resolved' | 'closed' | string;
+  created_at: string;
+};
+
 interface Props {
-  initialTickets: any[];
+  initialTickets: SupportTicket[];
   orders: OrderWithItems[];
 }
 
 export default function SupportClient({ initialTickets, orders }: Props) {
-  const [tickets, setTickets] = useState<any[]>(initialTickets);
+  const [tickets, setTickets] = useState<SupportTicket[]>(initialTickets);
   const [showNewTicket, setShowNewTicket] = useState(false);
 
   const [subject, setSubject] = useState('');
@@ -48,8 +56,8 @@ export default function SupportClient({ initialTickets, orders }: Props) {
         setOrderId('');
         setTickets(prev => [newTicket, ...prev]);
       }, 2000);
-    } catch (error: any) {
-      alert(error.message || 'حدث خطأ أثناء إرسال التذكرة');
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Failed to submit support ticket');
     } finally {
       setSubmitting(false);
     }

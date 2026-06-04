@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Transition } from 'framer-motion';
 import { ShoppingBag, Check, SlidersHorizontal, X, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
@@ -17,7 +17,7 @@ interface Props {
   activeCategoryId?: string;
 }
 
-const ease = [0.22, 1, 0.36, 1];
+const ease: Transition['ease'] = [0.22, 1, 0.36, 1];
 
 export default function ProductsPageClient({ categories, products, activeCategory, activeCategoryId }: Props) {
   const { addItem } = useCart();
@@ -35,7 +35,7 @@ export default function ProductsPageClient({ categories, products, activeCategor
     e.stopPropagation();
     const defaultVariant = product.variants?.find(v => v.is_default) ?? product.variants?.[0];
     const price = defaultVariant?.price ?? product.base_price;
-    addItem({ id: product.id as any, name: product.name_ar, price: Number(price), image: product.images?.[0] ?? '' });
+    addItem({ id: product.id, name: product.name_ar, price: Number(price), image: product.images?.[0] ?? '' });
     setAddedMap(prev => ({ ...prev, [product.id]: true }));
     setTimeout(() => setAddedMap(prev => ({ ...prev, [product.id]: false })), 2000);
   };

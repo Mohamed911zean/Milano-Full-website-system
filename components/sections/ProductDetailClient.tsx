@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, type Transition } from 'framer-motion';
 import {
   Minus, Plus, ShoppingBag, Heart, ChevronDown,
   Truck, ShieldCheck, Clock, ChevronRight, Check, ArrowLeft
@@ -12,9 +12,9 @@ import {
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/Button';
-import type { ProductWithVariants } from '@/lib/supabase/types';
+import type { Category, ProductWithVariants } from '@/lib/supabase/types';
 
-const ease = [0.22, 1, 0.36, 1];
+const ease: Transition['ease'] = [0.22, 1, 0.36, 1];
 
 function Accordion({ title, content, index }: { title: string; content: string; index: number }) {
   const [open, setOpen] = useState(false);
@@ -49,7 +49,7 @@ function Accordion({ title, content, index }: { title: string; content: string; 
 }
 
 interface Props {
-  product: ProductWithVariants & { category: any };
+  product: ProductWithVariants & { category: Category | null };
 }
 
 export default function ProductDetailClient({ product }: Props) {
@@ -74,7 +74,7 @@ export default function ProductDetailClient({ product }: Props) {
   const handleAdd = () => {
     if (added) return;
     addItem({
-      id: product.id as any,
+      id: product.id,
       name: `${product.name_ar}${selectedVariant ? ` — ${selectedVariant.name_ar}` : ''}`,
       price,
       image: image ?? '',

@@ -4,7 +4,9 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { motion } from 'framer-motion';
+import { motion, type Transition } from 'framer-motion';
+
+const ease: Transition['ease'] = [0.22, 1, 0.36, 1];
 
 export function SpecialCakeCTA() {
   const dynamicDate = new Date();
@@ -31,7 +33,7 @@ export function SpecialCakeCTA() {
             <motion.div
               initial={{ opacity: 0, y: 30, x: 20 }}
               whileInView={{ opacity: 1, y: 0, x: 0 }}
-              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 1, ease }}
               viewport={{ once: true }}
               className="flex flex-col items-center lg:items-start"
             >

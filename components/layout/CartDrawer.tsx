@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls, type PanInfo } from 'framer-motion';
 import { X, Minus, Plus, ShoppingBag, ArrowRight, Trash2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,7 @@ export function CartDrawer() {
   const drawerRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   // Close on Escape key
@@ -40,7 +40,7 @@ export function CartDrawer() {
     return () => { document.body.style.overflow = ''; };
   }, [isCartOpen]);
 
-  const handleQuantityChange = (id: number, delta: number, currentQty: number) => {
+  const handleQuantityChange = (id: string | number, delta: number, currentQty: number) => {
     if (currentQty + delta < 1) {
       removeItem(id);
     } else {
@@ -72,7 +72,7 @@ export function CartDrawer() {
             dragControls={dragControls}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={{ left: 0, right: 0.3 }}
-            onDragEnd={(_ : any, info : any) => {
+            onDragEnd={(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
               if (info.offset.x > 120 || info.velocity.x > 500) setIsCartOpen(false);
             }}
             initial={{ x: '100%' }}

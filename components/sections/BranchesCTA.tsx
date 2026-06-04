@@ -3,8 +3,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { motion } from 'framer-motion';
+import { motion, type Transition } from 'framer-motion';
 import { MapPin } from 'lucide-react';
+
+const ease: Transition['ease'] = [0.22, 1, 0.36, 1];
 
 export function BranchesCTA() {
   return (
@@ -13,7 +15,7 @@ export function BranchesCTA() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.8, ease }}
           viewport={{ once: true }}
           className="relative flex flex-col md:flex-row items-center gap-10 md:gap-0
                      px-6 py-12 sm:px-10 sm:py-16 md:px-16 md:py-20
