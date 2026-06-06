@@ -16,7 +16,7 @@ export default function SignupPage() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const router = useRouter();
   const supabase = createClient();
 
@@ -33,16 +33,32 @@ export default function SignupPage() {
           full_name: fullName,
           phone: phone,
         },
+        // مش بنبعت confirmation email
+        emailRedirectTo: undefined,
       },
     });
 
     if (error) {
-      setError(error.message);
+      // ترجمة أشهر الأخطاء للعربي
+      if (error.message.includes('already registered')) {
+        setError('البريد الإلكتروني مسجل مسبقاً، جرب تسجيل الدخول');
+      } else if (error.message.includes('Password should be')) {
+        setError('كلمة المرور لازم تكون 6 أحرف على الأقل');
+      } else {
+        setError('حصل خطأ، حاول تاني');
+      }
       setLoading(false);
-    } else {
-      // Create profile record (usually via trigger, but let's assume we need to handle it or redirect)
-      router.push('/account');
+      return;
+    }
+
+    // لو التأكيد معطل في Supabase، الـ session بتتعمل فوراً
+    if (data.session) {
+      router.push('/account/profile');
       router.refresh();
+    } else {
+      // لو لسه مفعل التأكيد، وضّح للمستخدم
+      setError('تم إرسال رسالة تأكيد لبريدك، تحقق منها للمتابعة');
+      setLoading(false);
     }
   };
 
@@ -51,23 +67,24 @@ export default function SignupPage() {
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[600px] bg-gold/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
         className="w-full max-w-md"
       >
         <div className="glass-card p-8 md:p-12 rounded-3xl shadow-premium relative z-10 text-center">
           <SectionLabel className="justify-center">انضم إلينا</SectionLabel>
           <h1 className="font-display text-4xl font-bold text-white mb-2">حساب جديد</h1>
           <p className="text-text-secondary text-sm mb-8 font-light">ابدأ تجربتك مع حلويات ميلانو الراقية</p>
-          
+
           <form onSubmit={handleSignup} className="space-y-4 text-right">
+            {/* الاسم */}
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-text-fade font-bold px-1">الاسم بالكامل</label>
               <div className="relative">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="محمد أحمد"
@@ -78,11 +95,12 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* الهاتف */}
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-text-fade font-bold px-1">رقم الهاتف</label>
               <div className="relative">
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="01xxxxxxxxx"
@@ -94,11 +112,12 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* الإيميل */}
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-text-fade font-bold px-1">البريد الإلكتروني</label>
               <div className="relative">
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
@@ -109,30 +128,32 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* كلمة المرور */}
             <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest text-text-fade font-bold px-1">كلمة المرور</label>
               <div className="relative">
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  minLength={6}
                   className="w-full h-14 bg-white/5 border border-white/10 rounded-xl px-12 text-sm text-white placeholder:text-text-fade focus:border-gold focus:bg-white/10 transition-all duration-300 outline-none"
                   required
                 />
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-fade" />
               </div>
+              <p className="text-[10px] text-text-fade px-1">على الأقل 6 أحرف</p>
             </div>
 
+            {/* Error */}
             {error && (
-              <p className="text-red-500 text-xs text-center font-medium animate-pulse">{error}</p>
+              <p className="text-red-400 text-xs text-center font-medium bg-red-500/10 border border-red-500/20 rounded-xl py-3 px-4">
+                {error}
+              </p>
             )}
 
-            <Button 
-              type="submit" 
-              className="w-full h-14 mt-4" 
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full h-14 mt-4" disabled={loading}>
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'إنشاء الحساب'}
             </Button>
           </form>

@@ -1,6 +1,4 @@
 // lib/services/orders.ts
-// كل logic خاصة بالطلبات بتمشي من هنا
-
 import { createClient } from '@/lib/supabase/server'
 import type { Order, OrderWithItems, OrderStatus } from '@/lib/supabase/types'
 import type { CreateOrderInput } from '@/lib/schemas/order'
@@ -8,20 +6,16 @@ import type { CreateOrderInput } from '@/lib/schemas/order'
 // ============================================================
 // Customer: إنشاء طلب جديد
 // ============================================================
-
 export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const supabase = await createClient()
 
-  // جيب الـ user_id لو authenticated
   const { data: { user } } = await supabase.auth.getUser()
 
-  // احسب الـ subtotal
   const subtotal = input.items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
     0
   )
 
-  // جيب delivery fee من الـ config
   const { data: configData } = await supabase
     .from('shop_config')
     .select('value')
@@ -33,10 +27,11 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
       ? (configData?.value as number) ?? 0
       : 0
 
-  // اعمل الـ order
+  // order_number بيتولد أوتوماتيك من الـ trigger
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
+      user_id:          user?.id ?? null,   // ← ربط الأوردر باليوزر
       customer_name:    input.customerName,
       customer_phone:   input.customerPhone,
       delivery_address: input.deliveryAddress ?? null,
@@ -47,14 +42,12 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
       subtotal,
       delivery_fee:     deliveryFee,
       customer_notes:   input.customerNotes ?? null,
-      user_id:          user?.id || null, // Link to user if logged in
     })
     .select()
     .single()
 
-  if (orderError) throw new Error(`Failed to create order: ${orderError.message}`)
+  if (orderError) throw new Error(`فشل إنشاء الطلب: ${orderError.message}`)
 
-  // اعمل الـ order items
   const orderItems = input.items.map((item) => ({
     order_id:        order.id,
     product_id:      item.productId,
@@ -70,7 +63,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     .from('order_items')
     .insert(orderItems)
 
-  if (itemsError) throw new Error(`Failed to create order items: ${itemsError.message}`)
+  if (itemsError) throw new Error(`فشل إنشاء عناصر الطلب: ${itemsError.message}`)
 
   return order
 }
@@ -78,30 +71,25 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
 // ============================================================
 // Customer: جلب طلبات المستخدم
 // ============================================================
-
 export async function getUserOrders(): Promise<OrderWithItems[]> {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
   const { data, error } = await supabase
     .from('orders')
-    .select(`
-      *,
-      items:order_items (*)
-    `)
+    .select(`*, items:order_items(*)`)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  if (error) throw new Error(`Failed to fetch user orders: ${error.message}`)
-  return data as OrderWithItems[]
+  if (error) throw new Error(`فشل جلب الطلبات: ${error.message}`)
+  return (data ?? []) as OrderWithItems[]
 }
 
 // ============================================================
-// Customer: تتبع الطلب
+// Customer: تتبع طلب بالرقم والتليفون
 // ============================================================
-
 export async function getOrderByNumberAndPhone(
   orderNumber: string,
   customerPhone: string
@@ -110,33 +98,30 @@ export async function getOrderByNumberAndPhone(
 
   const { data, error } = await supabase
     .from('orders')
-    .select(`
-      *,
-      items:order_items (*)
-    `)
+    .select(`*, items:order_items(*)`)
     .eq('order_number', orderNumber)
     .eq('customer_phone', customerPhone)
     .single()
 
   if (error) {
     if (error.code === 'PGRST116') return null
-    throw new Error(`Failed to fetch order: ${error.message}`)
+    throw new Error(`فشل جلب الطلب: ${error.message}`)
   }
 
   return data as OrderWithItems
 }
 
 // ============================================================
-// Dashboard: جلب الطلبات (للموظف والأونر)
+// Dashboard: جلب الطلبات (للـ staff)
 // ============================================================
-
 export interface GetOrdersOptions {
-  status?: OrderStatus | OrderStatus[]
-  from?: string
-  to?: string
+  status?:     OrderStatus | OrderStatus[]
+  search?:     string   // بحث برقم الأوردر أو التليفون أو الاسم
+  from?:       string
+  to?:         string
   assignedTo?: string
-  limit?: number
-  offset?: number
+  limit?:      number
+  offset?:     number
 }
 
 export async function getOrders(
@@ -146,61 +131,63 @@ export async function getOrders(
 
   let query = supabase
     .from('orders')
-    .select(`
-      *,
-      items:order_items (*)
-    `, { count: 'exact' })
+    .select(`*, items:order_items(*)`, { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (options.status) {
-    const statuses = Array.isArray(options.status)
-      ? options.status
-      : [options.status]
+    const statuses = Array.isArray(options.status) ? options.status : [options.status]
     query = query.in('status', statuses)
   }
 
-  if (options.from) query = query.gte('created_at', options.from)
-  if (options.to)   query = query.lte('created_at', options.to)
+  if (options.search) {
+    // بحث في رقم الأوردر أو التليفون أو الاسم
+    query = query.or(
+      `order_number.ilike.%${options.search}%,` +
+      `customer_phone.ilike.%${options.search}%,` +
+      `customer_name.ilike.%${options.search}%`
+    )
+  }
+
+  if (options.from)       query = query.gte('created_at', options.from)
+  if (options.to)         query = query.lte('created_at', options.to)
   if (options.assignedTo) query = query.eq('assigned_to', options.assignedTo)
-  if (options.limit)  query = query.limit(options.limit)
-  if (options.offset) query = query.range(options.offset, options.offset + (options.limit ?? 20) - 1)
+
+  const limit  = options.limit  ?? 20
+  const offset = options.offset ?? 0
+  query = query.range(offset, offset + limit - 1)
 
   const { data, error, count } = await query
 
-  if (error) throw new Error(`Failed to fetch orders: ${error.message}`)
-  return { orders: data as OrderWithItems[], count: count ?? 0 }
+  if (error) throw new Error(`فشل جلب الطلبات: ${error.message}`)
+  return { orders: (data ?? []) as OrderWithItems[], count: count ?? 0 }
 }
 
 // ============================================================
 // Dashboard: تغيير status الطلب
 // ============================================================
-
 export async function updateOrderStatus(
   orderId: string,
-  status: OrderStatus,
-  staffId: string
+  status: OrderStatus
 ): Promise<void> {
   const supabase = await createClient()
 
-  const updates: Partial<Order> = {
-    status,
-    ...(status === 'confirmed'  && { confirmed_at: new Date().toISOString() }),
-    ...(status === 'delivered'  && { delivered_at: new Date().toISOString() }),
-    ...(status === 'picked_up'  && { delivered_at: new Date().toISOString() }),
-  }
+  const updates: Record<string, unknown> = { status }
+
+  if (status === 'confirmed')                        updates.confirmed_at = new Date().toISOString()
+  if (status === 'delivered' || status === 'picked_up') updates.delivered_at = new Date().toISOString()
 
   const { error } = await supabase
     .from('orders')
     .update(updates)
     .eq('id', orderId)
 
-  if (error) throw new Error(`Failed to update order status: ${error.message}`)
+  if (error) throw new Error(`فشل تحديث حالة الطلب: ${error.message}`)
 }
 
-export async function addStaffNote(
-  orderId: string,
-  note: string
-): Promise<void> {
+// ============================================================
+// Dashboard: إضافة ملاحظة staff
+// ============================================================
+export async function addStaffNote(orderId: string, note: string): Promise<void> {
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -208,13 +195,12 @@ export async function addStaffNote(
     .update({ staff_notes: note })
     .eq('id', orderId)
 
-  if (error) throw new Error(`Failed to add staff note: ${error.message}`)
+  if (error) throw new Error(`فشل إضافة الملاحظة: ${error.message}`)
 }
 
 // ============================================================
-// Analytics (Owner only)
+// Analytics (Owner)
 // ============================================================
-
 export async function getOrderStats(from: string, to: string) {
   const supabase = await createClient()
 
@@ -225,11 +211,11 @@ export async function getOrderStats(from: string, to: string) {
     .lte('created_at', to)
     .not('status', 'eq', 'cancelled')
 
-  if (error) throw new Error(`Failed to fetch stats: ${error.message}`)
+  if (error) throw new Error(`فشل جلب الإحصائيات: ${error.message}`)
 
-  const totalOrders   = data.length
-  const totalRevenue  = data.reduce((sum, o) => sum + (o.total_price ?? 0), 0)
-  const delivered     = data.filter(o => ['delivered','picked_up'].includes(o.status)).length
-
-  return { totalOrders, totalRevenue, delivered }
+  return {
+    totalOrders:  data.length,
+    totalRevenue: data.reduce((s, o) => s + (o.total_price ?? 0), 0),
+    delivered:    data.filter(o => ['delivered', 'picked_up'].includes(o.status)).length,
+  }
 }
