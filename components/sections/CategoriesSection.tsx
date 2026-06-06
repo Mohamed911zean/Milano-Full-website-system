@@ -14,7 +14,7 @@ const CATEGORY_FALLBACKS: Record<string, string> = {
   'جاتوه': '/special-gateau.jpg',
   'حلويات شرقية': '/oriental-category.jpg',
   'مخبوزات': '/bakery.jpg',
-  'كافيهات': '/bakery-category.jpg',
+  'كافيهات': '/eclair.jpg',
   'شوكليت': '/chocolate-category.jpg',
   'منيو العيد': '/kahk.jpg',
   'منيو المناسبات': '/ready-assortments.jpg',
