@@ -11,10 +11,10 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
 const OCCASIONS = [
-  { id: 'Birthday', title: 'عيد ميلاد', image: '/cake/heart-cake.jpg', desc: 'احتفل بعام آخر جميل' },
-  { id: 'Wedding', title: 'زفاف', image: '/cake/royal-cake.png', desc: 'تحفة فنية ليومك الخاص' },
-  { id: 'Engagement', title: 'خطوبة', image: '/cake/vadge.jpg', desc: 'بداية الأبدية' },
-  { id: 'Custom Character', title: 'شخصيات', image: '/cake/oreo-cake.jpg', desc: 'خيال ينبض بالحياة' },
+  { id: 'Birthday', title: 'عيد ميلاد', image: '/kitkat-cake.jpg', desc: 'احتفل بعام آخر جميل' },
+  { id: 'Wedding', title: 'زفاف', image: '/four-season-cake.jpg', desc: 'تحفة فنية ليومك الخاص' },
+  { id: 'Engagement', title: 'خطوبة', image: '/cake-40x40.jpg', desc: 'بداية الأبدية' },
+  { id: 'Custom Character', title: 'حفل تخرج', image: '/cake-30x40.jpg', desc: 'خيال ينبض بالحياة' },
 ];
 
 const FLAVORS = [
@@ -80,7 +80,7 @@ export default function SpecialCakesPage() {
       <div className="bg-bg-base relative min-h-screen pt-24 pb-20 flex flex-col justify-center overflow-hidden" dir="rtl">
         {/* الخلفية والمؤثرات البصرية */}
         <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gold/5 blur-[150px] rounded-full" />
+          <div className="absolute top-0 right-0  h-[800px] bg-gold/5 blur-[150px] rounded-full" />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gold/5 blur-[120px] rounded-full" />
         </div>
 
