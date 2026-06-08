@@ -104,11 +104,7 @@ export default function CheckoutPage() {
       });
 
       if (!result.success) {
-        // أخطاء validation من Zod
-        const msgs = result.errors
-          ? Object.values(result.errors).flat().join(' — ')
-          : result.message ?? 'حصل خطأ، حاول تاني';
-        setError(msgs);
+        setError(result.message ?? 'حصل خطأ، حاول تاني');
         setLoading(false);
         return;
       }
