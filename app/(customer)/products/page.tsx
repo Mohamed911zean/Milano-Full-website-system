@@ -1,21 +1,24 @@
-import ProductsPageClient from '@/components/sections/ProductsPageClient';
-import { getActiveCategories, getProductsByCategory, getActiveProducts } from '@/lib/services/products';
+// app/(customer)/products/page.tsx
+import ProductsPageClient from '@/components/sections/ProductsPageClient'
+import { getActiveCategories, getProductsByCategory, getActiveProducts } from '@/lib/services/products'
 
 interface ProductsPageProps {
-  searchParams: { category?: string };
+  searchParams: Promise<{ category?: string }>
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const categoryId = searchParams.category;
+  // Next.js 15: searchParams بقى async — لازم await
+  const params = await searchParams
+  const categoryId = params.category
 
   const [categories, products] = await Promise.all([
     getActiveCategories(),
     categoryId
       ? getProductsByCategory(categoryId)
       : getActiveProducts(),
-  ]);
+  ])
 
-  const activeCategory = categories.find(c => c.id === categoryId) ?? null;
+  const activeCategory = categories.find(c => c.id === categoryId) ?? null
 
   return (
     <ProductsPageClient
@@ -24,5 +27,5 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       activeCategory={activeCategory}
       activeCategoryId={categoryId}
     />
-  );
+  )
 }

@@ -94,7 +94,7 @@ export default function ProductDetailClient({ product }: Props) {
   return (
     <div className="bg-bg-base min-h-screen overflow-x-hidden" dir="rtl">
       {/* Ambient */}
-      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-gold/4 blur-[160px] rounded-full pointer-events-none z-0" />
+      <div className="fixed top-0 right-0  h-[500px] bg-gold/4 blur-[160px] rounded-full pointer-events-none z-0" />
 
       {/* Breadcrumb */}
       <div className="container relative z-10 pt-24 pb-2">

@@ -1,21 +1,25 @@
-import { HeroSlider } from "@/components/sections/HeroSlider";
-import { CategoriesSection } from "@/components/sections/CategoriesSection";
-import { SpecialCakeCTA } from "@/components/sections/SpecialCakeCTA";
-import { ProductSpotlight } from "@/components/sections/ProductSpotlight";
-import { LegacyStats } from "@/components/sections/LegacyStats";
-import { WhyChooseUs } from "@/components/sections/WhyChooseUs";
-import { BranchesCTA } from "@/components/sections/BranchesCTA";
-import { getActiveCategories } from "@/lib/services/products";
+// app/(customer)/page.tsx
+import { HeroSlider } from "@/components/sections/HeroSlider"
+import { CategoriesSection } from "@/components/sections/CategoriesSection"
+import { SpecialCakeCTA } from "@/components/sections/SpecialCakeCTA"
+import { ProductSpotlight } from "@/components/sections/ProductSpotlight"
+import { LegacyStats } from "@/components/sections/LegacyStats"
+import { WhyChooseUs } from "@/components/sections/WhyChooseUs"
+import { BranchesCTA } from "@/components/sections/BranchesCTA"
+import { getActiveCategories } from "@/lib/services/products"
 
 export default async function Home() {
-  // Categories من Supabase
-  const categories = await getActiveCategories();
+  let categories: any = []
+  try {
+    categories = await getActiveCategories()
+  } catch (e) {
+    console.error('Failed to load categories:', e)
+  }
 
   return (
     <div className="relative overflow-hidden">
       <HeroSlider />
 
-      {/* Gap section */}
       <div className="py-24 flex flex-col gap-24">
         <CategoriesSection categories={categories} />
 
@@ -31,5 +35,5 @@ export default async function Home() {
       <WhyChooseUs />
       <BranchesCTA />
     </div>
-  );
+  )
 }
