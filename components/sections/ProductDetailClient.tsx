@@ -5,48 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useScroll, useTransform, type Transition } from 'framer-motion';
-import {
-  Minus, Plus, ShoppingBag, Heart, ChevronDown,
-  Truck, ShieldCheck, Clock, ChevronRight, Check, ArrowLeft
-} from 'lucide-react';
+import { Minus, Plus, ShoppingBag, Check, Clock, Truck, ShieldCheck, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
-import { Button } from '@/components/ui/Button';
 import type { Category, ProductWithVariants } from '@/lib/supabase/types';
 
 const ease: Transition['ease'] = [0.22, 1, 0.36, 1];
-
-function Accordion({ title, content, index }: { title: string; content: string; index: number }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b border-gold-border/10 last:border-0">
-      <button onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 group">
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] font-black text-gold/30 tabular-nums">0{index + 1}</span>
-          <span className="text-[11px] uppercase tracking-[0.2em] font-bold text-text-secondary group-hover:text-gold transition-colors">{title}</span>
-        </div>
-        <div className={cn('w-7 h-7 rounded-full border flex items-center justify-center transition-all duration-500',
-          open ? 'border-gold/50 bg-gold/10' : 'border-gold-border/20 group-hover:border-gold/30')}>
-          <ChevronDown className={cn('w-3 h-3 transition-all duration-300', open ? 'text-gold rotate-180' : 'text-text-muted')} />
-        </div>
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease }}
-            className="overflow-hidden"
-          >
-            <p className="pb-6 pr-9 text-sm text-text-muted leading-relaxed">{content}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 interface Props {
   product: ProductWithVariants & { category: Category | null };
@@ -58,304 +22,476 @@ export default function ProductDetailClient({ product }: Props) {
   const imgRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({ target: imgRef, offset: ['start start', 'end start'] });
-  const imgScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
-  const imgY = useTransform(scrollYProgress, [0, 1], ['0%', '8%']);
+  const imgScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
+  const imgY = useTransform(scrollYProgress, [0, 1], ['0%', '12%']);
 
-  const defaultVariant = product.variants?.find(v => v.is_default) ?? product.variants?.[0];
-  const [selectedVariant, setSelectedVariant] = useState(defaultVariant ?? null);
+  const variants = product.variants ?? [];
+  const defaultVariant = variants.find(v => v.is_default) ?? variants[0] ?? null;
+  const [selectedVariant, setSelectedVariant] = useState(defaultVariant);
   const [quantity, setQuantity] = useState(1);
-  const [cakeText, setCakeText] = useState('');
-  const [wishlisted, setWishlisted] = useState(false);
   const [added, setAdded] = useState(false);
 
   const price = Number(selectedVariant?.price ?? product.base_price);
+  const total = price * quantity;
   const image = product.images?.[0];
 
   const handleAdd = () => {
     if (added) return;
-    addItem({
-      id: product.id,
-      name: `${product.name_ar}${selectedVariant ? ` — ${selectedVariant.name_ar}` : ''}`,
-      price,
-      image: image ?? '',
-    });
+    addItem(
+      {
+        id: product.id,
+        name: selectedVariant ? `${product.name_ar} — ${selectedVariant.name_ar}` : product.name_ar,
+        price,
+        image: image ?? '',
+      },
+      true,
+      quantity
+    );
     setAdded(true);
-    setTimeout(() => setAdded(false), 2400);
+    setTimeout(() => setAdded(false), 2500);
   };
-
-  const details = [
-    product.description_ar && { title: 'وصف المنتج', content: product.description_ar },
-    product.preparation_type === 'made_to_order' && product.prep_duration_minutes && {
-      title: 'وقت التحضير',
-      content: `هذا المنتج يُجهز خصيصاً لك، يستغرق حوالي ${product.prep_duration_minutes} دقيقة.`
-    },
-  ].filter(Boolean) as { title: string; content: string }[];
 
   return (
     <div className="bg-bg-base min-h-screen overflow-x-hidden" dir="rtl">
-      {/* Ambient */}
-      <div className="fixed top-0 right-0  h-[500px] bg-gold/4 blur-[160px] rounded-full pointer-events-none z-0" />
 
-      {/* Breadcrumb */}
-      <div className="container relative z-10 pt-24 pb-2">
-        <nav className="flex items-center gap-2 flex-wrap">
-          <Link href="/" className="text-[10px] uppercase tracking-[0.2em] text-text-fade hover:text-gold transition-colors">الرئيسية</Link>
-          <ChevronRight className="w-3 h-3 text-gold-border/30" />
-          <Link href="/products" className="text-[10px] uppercase tracking-[0.2em] text-text-fade hover:text-gold transition-colors">المنتجات</Link>
-          {product.category && (
-            <>
-              <ChevronRight className="w-3 h-3 text-gold-border/30" />
-              <Link href={`/products?category=${product.category_id}`}
-                className="text-[10px] uppercase tracking-[0.2em] text-text-fade hover:text-gold transition-colors">
-                {product.category.name_ar}
-              </Link>
-            </>
-          )}
-          <ChevronRight className="w-3 h-3 text-gold-border/30" />
-          <span className="text-[10px] uppercase tracking-[0.2em] text-text-secondary font-bold truncate max-w-[140px]">{product.name_ar}</span>
-        </nav>
+      {/* ──────────────────────── AMBIENT GLOW ──────────────────────── */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gold/5 blur-[140px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-gold/3 blur-[100px]" />
       </div>
 
-      {/* Hero split */}
-      <section className="relative z-10 flex flex-col lg:flex-row">
+      {/* ──────────────────────── BACK BUTTON ──────────────────────── */}
+      <div className="relative z-20 container pt-24 pb-4">
+        <button
+          onClick={() => router.back()}
+          className="group flex items-center gap-2 text-text-muted hover:text-gold transition-colors duration-300"
+        >
+          <span className="w-8 h-8 rounded-full border border-gold-border/20 flex items-center justify-center group-hover:border-gold/40 group-hover:bg-gold/5 transition-all duration-300">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </span>
+          <span className="text-[11px] uppercase tracking-[0.25em] font-bold">رجوع</span>
+        </button>
+      </div>
 
-        {/* Image */}
-        <div ref={imgRef}
-          className="lg:sticky lg:top-[80px] lg:self-start w-full lg:w-[52%] relative overflow-hidden"
-          style={{ height: 'clamp(360px, 55vw, calc(100vh - 80px))' }}>
-          <motion.div className="absolute inset-0 will-change-transform" style={{ scale: imgScale, y: imgY }}>
-            {image ? (
-              <Image src={image} alt={product.name_ar} fill className="object-cover object-center" priority
-                sizes="(max-width: 1024px) 100vw, 52vw" quality={95} />
-            ) : (
-              <div className="w-full h-full bg-bg-elevated flex items-center justify-center">
-                <span className="font-display text-gold/20 text-8xl font-bold">M</span>
+      {/* ──────────────────────── HERO LAYOUT ──────────────────────── */}
+      <section className="relative z-10 container">
+        <div className="flex flex-col lg:flex-row gap-0 lg:gap-16 xl:gap-24">
+
+          {/* ── IMAGE ── */}
+          <div
+            ref={imgRef}
+            className="w-full lg:w-[52%] lg:sticky lg:top-24 lg:self-start"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease }}
+              className="relative overflow-hidden rounded-3xl bg-bg-card"
+              style={{ height: 'clamp(380px, 56vw, 680px)' }}
+            >
+              <motion.div className="absolute inset-0" style={{ scale: imgScale, y: imgY }}>
+                {image ? (
+                  <Image
+                    src={image}
+                    alt={product.name_ar}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 52vw"
+                    quality={95}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-bg-elevated flex items-center justify-center">
+                    <span className="font-display text-gold/15 text-9xl font-bold select-none">M</span>
+                  </div>
+                )}
+              </motion.div>
+
+              {/* gradient overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-bg-base/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-bg-base/10 lg:to-bg-base/20" />
+
+              {/* badges */}
+              <div className="absolute top-5 right-5 flex flex-col gap-2">
+                {product.is_featured && (
+                  <motion.span
+                    initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4, ease }}
+                    className="flex items-center gap-1.5 bg-gold text-text-on-gold text-[9px] font-black uppercase tracking-[0.15em] px-3 py-1.5 rounded-full shadow-lg"
+                  >
+                    <Star className="w-2.5 h-2.5 fill-current" />
+                    الأكثر طلباً
+                  </motion.span>
+                )}
+                {product.preparation_type === 'made_to_order' && (
+                  <motion.span
+                    initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5, ease }}
+                    className="bg-bg-base/70 backdrop-blur-sm border border-gold/30 text-gold text-[9px] font-black px-3 py-1.5 rounded-full"
+                  >
+                    يُجهز خصيصاً
+                  </motion.span>
+                )}
               </div>
-            )}
-          </motion.div>
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-base/50 via-transparent to-bg-base/20" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-bg-base/20 lg:to-bg-base/30" />
 
-          {/* Badges overlay */}
-          <div className="absolute top-4 right-4 flex flex-col gap-2">
-            {product.is_featured && (
-              <span className="bg-gold text-text-on-gold text-[9px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full">
-                الأكثر طلباً
-              </span>
-            )}
-            {product.preparation_type === 'made_to_order' && (
-              <span className="bg-bg-base/70 backdrop-blur-sm border border-gold/30 text-gold text-[9px] font-black px-3 py-1 rounded-full">
-                يُجهز خصيصاً
-              </span>
-            )}
+              {/* Bottom info strip on image */}
+              <div className="absolute bottom-0 inset-x-0 p-5">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, ease }}
+                  className="flex items-center gap-4"
+                >
+                  {[
+                    { icon: Truck, label: 'توصيل سريع' },
+                    { icon: ShieldCheck, label: 'جودة مضمونة' },
+                    { icon: Clock, label: 'طازج يومياً' },
+                  ].map(({ icon: Icon, label }, i) => (
+                    <div key={i} className="flex items-center gap-1.5 text-white/70">
+                      <Icon className="w-3 h-3" />
+                      <span className="text-[9px] font-bold uppercase tracking-wider">{label}</span>
+                    </div>
+                  ))}
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
 
-          {/* Wishlist */}
-          <button
-            onClick={() => setWishlisted(!wishlisted)}
-            className={cn('absolute top-4 left-4 w-10 h-10 rounded-full backdrop-blur-xl border flex items-center justify-center transition-all duration-500',
-              wishlisted ? 'bg-gold border-gold text-text-on-gold' : 'bg-bg-base/50 border-white/10 text-text-muted hover:text-gold hover:border-gold/30'
-            )}>
-            <Heart className={cn('w-4 h-4', wishlisted && 'fill-current')} />
-          </button>
-        </div>
+          {/* ── PRODUCT INFO ── */}
+          <div className="w-full lg:w-[48%] flex flex-col py-6 lg:py-10">
 
-        {/* Info */}
-        <div className="w-full lg:w-[48%] flex flex-col px-5 sm:px-8 lg:px-12 py-8 lg:py-16 relative z-10">
+            {/* Category breadcrumb */}
+            {product.category && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, ease }}>
+                <Link
+                  href={`/products?category=${product.category_id}`}
+                  className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.3em] text-gold/60 hover:text-gold font-black transition-colors mb-5"
+                >
+                  <span className="w-4 h-px bg-gold/40" />
+                  {product.category.name_ar}
+                </Link>
+              </motion.div>
+            )}
 
-          {/* Category */}
-          {product.category && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, ease }}>
-              <Link href={`/products?category=${product.category_id}`}
-                className="text-[10px] uppercase tracking-[0.3em] text-gold/60 font-bold hover:text-gold transition-colors mb-4 block">
-                {product.category.name_ar}
-              </Link>
-            </motion.div>
-          )}
+            {/* Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.22, duration: 0.7, ease }}
+              className="font-display font-light text-white leading-[1.05] tracking-tight mb-5"
+              style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}
+            >
+              {product.name_ar}
+            </motion.h1>
 
-          {/* Title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.28, duration: 0.7, ease }}
-            className="font-display font-light text-white leading-[1.05] tracking-tight mb-6"
-            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>
-            {product.name_ar}
-          </motion.h1>
-
-          {/* Price */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, ease }}
-            className="flex items-baseline gap-3 mb-8 pb-8 border-b border-gold-border/10">
-            <span className="font-display text-4xl sm:text-5xl text-gold tracking-tight">
-              {price.toLocaleString('ar-EG')}
-            </span>
-            <span className="text-gold/40 font-light tracking-widest">جنيه</span>
-          </motion.div>
-
-          {/* Description */}
-          {product.description_ar && (
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-              className="text-text-secondary text-sm leading-[1.9] mb-8">
-              {product.description_ar}
-            </motion.p>
-          )}
-
-          {/* Variants */}
-          {product.variants && product.variants.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.46, ease }} className="mb-8">
-              <p className="text-[10px] uppercase tracking-[0.25em] text-gold/50 font-black mb-3">اختر الحجم</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {product.variants.map(v => (
-                  <button key={v.id} onClick={() => setSelectedVariant(v)}
-                    className={cn('py-3 px-2 rounded-2xl border text-center transition-all duration-300 active:scale-[0.97]',
-                      selectedVariant?.id === v.id
-                        ? 'border-gold bg-gold/8 shadow-[0_0_16px_rgba(201,168,76,0.1)]'
-                        : 'border-gold-border/15 bg-bg-card/30 hover:border-gold-border/35'
-                    )}>
-                    <span className={cn('block text-[11px] font-black uppercase tracking-wider mb-1',
-                      selectedVariant?.id === v.id ? 'text-gold' : 'text-text-secondary')}>
-                      {v.name_ar}
-                    </span>
-                    <span className={cn('text-[11px] font-bold', selectedVariant?.id === v.id ? 'text-gold' : 'text-text-muted')}>
-                      {Number(v.price).toLocaleString('ar-EG')} جنيه
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Cake text */}
-          {product.allows_text_on_cake && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mb-8">
-              <label className="text-[10px] uppercase tracking-[0.25em] text-gold/50 font-black block mb-3">
-                الكتابة على الكيكة (اختياري)
-              </label>
-              <input
-                type="text" value={cakeText} onChange={e => setCakeText(e.target.value)}
-                placeholder='مثال: عيد ميلاد سعيد يا محمد'
-                className="w-full h-12 bg-bg-card/50 border border-gold-border/15 rounded-xl px-4 text-sm text-text-primary focus:border-gold outline-none transition-all placeholder:text-text-fade"
-              />
-            </motion.div>
-          )}
-
-          {/* Prep time */}
-          {product.preparation_type === 'made_to_order' && product.prep_duration_minutes && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.52 }}
-              className="flex items-center gap-3 p-4 bg-gold/5 border border-gold/10 rounded-xl mb-8 text-gold">
-              <Clock className="w-4 h-4 shrink-0" />
-              <span className="text-xs font-medium">
-                يُجهز خصيصاً لك في حوالي {product.prep_duration_minutes} دقيقة
+            {/* Price */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, ease }}
+              className="flex items-baseline gap-3 mb-8 pb-8 border-b border-gold-border/10"
+            >
+              <span className="font-display text-5xl text-gold tracking-tight tabular-nums">
+                {price.toLocaleString('ar-EG')}
               </span>
+              <span className="text-gold/40 text-lg font-light">جنيه</span>
+              {quantity > 1 && (
+                <span className="text-text-fade text-sm font-light mr-2">
+                  = {total.toLocaleString('ar-EG')} جنيه للكمية
+                </span>
+              )}
             </motion.div>
-          )}
 
-          {/* Quantity + CTA (desktop) */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.58, ease }}
-            className="hidden lg:flex gap-3 mb-8">
-            {/* Qty */}
-            <div className="flex items-center bg-bg-card/50 border border-gold-border/15 rounded-2xl px-1 gap-0.5 h-14 shrink-0">
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-11 h-11 flex items-center justify-center text-text-muted hover:text-gold transition-colors rounded-xl hover:bg-gold/5">
-                <Minus className="w-3.5 h-3.5" />
-              </button>
-              <span className="w-9 text-center font-display text-lg text-text-primary select-none">{quantity}</span>
-              <button onClick={() => setQuantity(quantity + 1)}
-                className="w-11 h-11 flex items-center justify-center text-text-muted hover:text-gold transition-colors rounded-xl hover:bg-gold/5">
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            {/* CTA */}
-            <button onClick={handleAdd}
-              className={cn('flex-1 h-14 rounded-2xl text-[11px] font-black uppercase tracking-[0.22em] transition-all duration-500 relative overflow-hidden group',
-                added
-                  ? 'bg-emerald-600/70 border border-emerald-500/30 text-white'
-                  : 'bg-gradient-to-br from-gold-light via-gold to-gold-dark text-text-on-gold shadow-[0_6px_28px_rgba(201,168,76,0.28)] hover:shadow-[0_10px_36px_rgba(201,168,76,0.42)] hover:-translate-y-0.5'
-              )}>
-              <AnimatePresence mode="wait">
-                {added
-                  ? <motion.span key="d" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                    className="flex items-center justify-center gap-2">
-                    <Check className="w-4 h-4" /> تمت الإضافة
-                  </motion.span>
-                  : <motion.span key="a" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                    className="flex items-center justify-center gap-2">
-                    <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" /> أضف للسلة
-                  </motion.span>
-                }
-              </AnimatePresence>
-              {/* Shine */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-                <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-900" />
-              </div>
-            </button>
-          </motion.div>
+            {/* Description */}
+            {product.description_ar && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.36 }}
+                className="text-text-secondary text-sm leading-[1.9] font-light mb-8"
+              >
+                {product.description_ar}
+              </motion.p>
+            )}
 
-          {/* Trust badges */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.64 }}
-            className="grid grid-cols-3 gap-2 mb-10">
-            {[
-              { icon: Truck, label: 'توصيل سريع' },
-              { icon: ShieldCheck, label: 'جودة مضمونة' },
-              { icon: Clock, label: 'طازج يومياً' },
-            ].map(({ icon: Icon, label }, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 py-3 rounded-xl bg-bg-card/20 border border-gold-border/8 group hover:border-gold-border/20 transition-all duration-400">
-                <div className="w-8 h-8 rounded-full bg-gold/5 border border-gold-border/10 flex items-center justify-center group-hover:bg-gold/10 transition-all">
-                  <Icon className="w-3.5 h-3.5 text-gold" />
+            {/* Prep time notice */}
+            {product.preparation_type === 'made_to_order' && product.prep_duration_minutes && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.38 }}
+                className="flex items-center gap-3 px-4 py-3 bg-gold/5 border border-gold/15 rounded-2xl mb-8 text-gold"
+              >
+                <Clock className="w-4 h-4 shrink-0" />
+                <span className="text-xs font-medium">
+                  يُجهز خصيصاً لك في حوالي {product.prep_duration_minutes} دقيقة
+                </span>
+              </motion.div>
+            )}
+
+            {/* Variants */}
+            {variants.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.42, ease }}
+                className="mb-8"
+              >
+                <p className="text-[10px] uppercase tracking-[0.28em] text-gold/50 font-black mb-4">اختر الحجم</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {variants.map(v => {
+                    const isSelected = selectedVariant?.id === v.id;
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => setSelectedVariant(v)}
+                        className={cn(
+                          'relative py-3.5 px-3 rounded-2xl border text-center transition-all duration-300 active:scale-[0.97] overflow-hidden',
+                          isSelected
+                            ? 'border-gold bg-gold/8 shadow-[0_0_24px_rgba(201,168,76,0.12),inset_0_1px_0_rgba(201,168,76,0.1)]'
+                            : 'border-gold-border/12 bg-bg-card/40 hover:border-gold-border/30 hover:bg-bg-card/60'
+                        )}
+                      >
+                        {isSelected && (
+                          <motion.div
+                            layoutId="variant-bg"
+                            className="absolute inset-0 bg-gold/5 rounded-2xl"
+                            transition={{ duration: 0.25, ease }}
+                          />
+                        )}
+                        <span className={cn(
+                          'relative block text-[11px] font-black uppercase tracking-wider mb-1',
+                          isSelected ? 'text-gold' : 'text-text-secondary'
+                        )}>
+                          {v.name_ar}
+                        </span>
+                        <span className={cn(
+                          'relative text-[11px] font-bold',
+                          isSelected ? 'text-gold/80' : 'text-text-muted'
+                        )}>
+                          {Number(v.price).toLocaleString('ar-EG')} جنيه
+                        </span>
+                        {isSelected && (
+                          <motion.div
+                            layoutId="variant-indicator"
+                            className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-gold"
+                            transition={{ duration: 0.25, ease }}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                <span className="text-[9px] uppercase tracking-[0.1em] text-text-fade font-bold text-center">{label}</span>
-              </div>
-            ))}
-          </motion.div>
+              </motion.div>
+            )}
 
-          {/* Accordions */}
-          {details.length > 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-              className="border-t border-gold-border/10">
-              {details.map((d, i) => <Accordion key={i} title={d.title} content={d.content} index={i} />)}
+            {/* ── QUANTITY + CTA (Desktop) ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, ease }}
+              className="hidden lg:flex flex-col gap-4"
+            >
+              {/* Quantity row */}
+              <div className="flex items-center gap-4">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-gold/50 font-black">الكمية</p>
+                <div className="flex items-center bg-bg-card/60 border border-gold-border/12 rounded-2xl overflow-hidden">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-12 h-12 flex items-center justify-center text-text-muted hover:text-gold hover:bg-gold/5 transition-all duration-200 active:scale-90"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="w-12 text-center font-display text-xl text-text-primary select-none tabular-nums">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-12 h-12 flex items-center justify-center text-text-muted hover:text-gold hover:bg-gold/5 transition-all duration-200 active:scale-90"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {quantity > 1 && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-sm text-gold font-display font-bold tabular-nums"
+                  >
+                    {total.toLocaleString('ar-EG')} جنيه
+                  </motion.span>
+                )}
+              </div>
+
+              {/* CTA */}
+              <button
+                onClick={handleAdd}
+                disabled={added}
+                className={cn(
+                  'relative h-16 rounded-2xl text-[12px] font-black uppercase tracking-[0.22em] transition-all duration-500 overflow-hidden group',
+                  added
+                    ? 'bg-emerald-600/70 border border-emerald-500/30 text-white cursor-default'
+                    : 'bg-gradient-to-br from-gold-light via-gold to-gold-dark text-text-on-gold shadow-[0_8px_32px_rgba(201,168,76,0.3)] hover:shadow-[0_12px_40px_rgba(201,168,76,0.45)] hover:-translate-y-0.5 active:translate-y-0'
+                )}
+              >
+                {/* Shine sweep on hover */}
+                {!added && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                    <div className="absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-700" />
+                  </div>
+                )}
+                <AnimatePresence mode="wait">
+                  {added ? (
+                    <motion.span
+                      key="done"
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      className="flex items-center justify-center gap-2.5"
+                    >
+                      <Check className="w-5 h-5" />
+                      تمت الإضافة للسلة!
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="add"
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      className="flex items-center justify-center gap-2.5"
+                    >
+                      <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                      أضف للسلة
+                      {quantity > 1 && (
+                        <span className="text-text-on-gold/70 font-medium text-[11px]">({quantity} قطعة)</span>
+                      )}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
             </motion.div>
-          )}
+
+            {/* Divider */}
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ delay: 0.6 }}
+              className="hidden lg:block origin-right h-px bg-gradient-to-l from-gold/20 via-gold-border/10 to-transparent mt-8 mb-6"
+            />
+
+            {/* Trust line */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.65 }}
+              className="hidden lg:block text-[10px] text-text-fade text-center font-light tracking-wider"
+            >
+              🔒 دفع آمن · توصيل مضمون · جودة فاخرة مضمونة
+            </motion.p>
+
+          </div>
         </div>
       </section>
 
-      {/* Mobile sticky bar */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-bg-base/96 backdrop-blur-2xl border-t border-gold-border/15"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      {/* ──────────────────────── MOBILE STICKY BAR ──────────────────────── */}
+      <div
+        className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-bg-base/96 backdrop-blur-2xl border-t border-gold-border/12"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex-1">
+
+          {/* Price column */}
+          <div className="flex-1 min-w-0">
             <p className="text-[9px] uppercase tracking-widest text-text-fade mb-0.5">الإجمالي</p>
-            <p className="font-display text-xl text-gold font-semibold tabular-nums">
-              {(price * quantity).toLocaleString('ar-EG')} <span className="text-xs text-gold/50">جنيه</span>
-            </p>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={total}
+                initial={{ y: 4, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -4, opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="font-display text-xl text-gold font-semibold tabular-nums"
+              >
+                {total.toLocaleString('ar-EG')}
+                <span className="text-xs text-gold/50 mr-1">جنيه</span>
+              </motion.p>
+            </AnimatePresence>
           </div>
-          <div className="flex items-center bg-bg-card/50 border border-gold-border/15 rounded-xl px-1 h-11 gap-0.5 shrink-0">
-            <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-gold rounded-lg active:scale-90 transition-colors">
+
+          {/* Quantity */}
+          <div className="flex items-center bg-bg-card/60 border border-gold-border/12 rounded-xl px-1 h-11 shrink-0">
+            <button
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-gold rounded-lg active:scale-90 transition-colors"
+            >
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <span className="w-7 text-center font-display text-base text-text-primary">{quantity}</span>
-            <button onClick={() => setQuantity(quantity + 1)}
-              className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-gold rounded-lg active:scale-90 transition-colors">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={quantity}
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.6, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="w-8 text-center font-display text-base text-text-primary tabular-nums"
+              >
+                {quantity}
+              </motion.span>
+            </AnimatePresence>
+            <button
+              onClick={() => setQuantity(quantity + 1)}
+              className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-gold rounded-lg active:scale-90 transition-colors"
+            >
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
-          <button onClick={handleAdd}
-            className={cn('flex-[2] h-12 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500 active:scale-[0.97]',
-              added ? 'bg-emerald-600/70 text-white' : 'bg-gradient-to-r from-gold via-gold-light to-gold text-text-on-gold shadow-[0_4px_16px_rgba(201,168,76,0.3)]'
-            )}>
+
+          {/* CTA */}
+          <button
+            onClick={handleAdd}
+            disabled={added}
+            className={cn(
+              'flex-[2] h-12 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-400 active:scale-[0.97] relative overflow-hidden',
+              added
+                ? 'bg-emerald-600/70 text-white cursor-default'
+                : 'bg-gradient-to-r from-gold via-gold-light to-gold text-text-on-gold shadow-[0_4px_20px_rgba(201,168,76,0.3)]'
+            )}
+          >
             <AnimatePresence mode="wait">
-              {added
-                ? <motion.span key="d" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                  className="flex items-center justify-center gap-2"><Check className="w-4 h-4" /> تمت الإضافة!</motion.span>
-                : <motion.span key="a" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="flex items-center justify-center gap-2"><ShoppingBag className="w-4 h-4" /> أضف للسلة</motion.span>
-              }
+              {added ? (
+                <motion.span
+                  key="done"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center justify-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  تمت الإضافة!
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="add"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center justify-center gap-1.5"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  أضف للسلة
+                </motion.span>
+              )}
             </AnimatePresence>
           </button>
+
         </div>
       </div>
-      <div className="lg:hidden h-[72px]" />
+
+      {/* spacer for mobile bar */}
+      <div className="lg:hidden h-[76px]" />
+
     </div>
   );
 }

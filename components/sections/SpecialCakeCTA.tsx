@@ -38,22 +38,23 @@ export function SpecialCakeCTA() {
               className="flex flex-col items-center lg:items-start"
             >
               <span className="text-script text-gold text-3xl lg:text-5xl mb-4 block drop-shadow-sm">
-                اطلب كيكتك المخصصة الآن
+               الكيكه الاكثر مبيعا 
               </span>
               
               {/* Responsive Text: Smaller on mobile, large on desktop */}
               <h2 className="text-3xl md:text-4xl lg:text-5xl text-text-primary mb-6 leading-tight font-bold max-w-lg lg:max-w-full">
-                اجعل احتفالك ذكرى لا تُنسى
+                مرشحه من جميع زبائننا 
               </h2>
               
               <p className="text-sm md:text-base text-text-secondary mb-10 max-w-md lg:max-w-xl font-light leading-relaxed">
-                سواء كان حفل زفاف، عيد ميلاد، أو مناسبة خاصة، نحن نصمم ونصنع كيكة أحلامك الفاخرة لتناسب ذوقك الرفيع بكل تفاصيلها.
+          اربع اقسام مميزه من الاوريو والشيكولاته الكرسبي البيضاء واللوتس والشيكولاته البنيه المميزه ملفوفه بحواف من شيكولاته الكيت كات
+
               </p>
 
               <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:justify-start sm:justify-center">
-                <Link href="/special-cakes" className="w-full sm:w-auto">
+                <Link href="/products" className="w-full sm:w-auto">
                   <Button variant="gold" size="lg" className="shadow-[0_10px_20px_-10px_rgba(212,169,79,0.5)] hover:scale-105 transition-transform w-full sm:w-auto">
-                    ابدأ الاستشارة الآن
+                   اطلبها الان
                   </Button>
                 </Link>
                 

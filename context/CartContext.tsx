@@ -12,7 +12,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'quantity'>, openDrawer?: boolean) => void;
+  addItem: (item: Omit<CartItem, 'quantity'>, openDrawer?: boolean, quantity?: number) => void;
   removeItem: (id: string | number) => void;
   updateQuantity: (id: string | number, delta: number) => void;
   clearCart: () => void;
@@ -41,15 +41,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('lenza_cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (item: Omit<CartItem, 'quantity'>, openDrawer = true) => {
+  const addItem = (item: Omit<CartItem, 'quantity'>, openDrawer = true, quantity = 1) => {
     setItems(prev => {
       const existing = prev.find(i => i.id === item.id);
       if (existing) {
         return prev.map(i =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { ...item, quantity }];
     });
     if (openDrawer) setIsCartOpen(true);
   };
