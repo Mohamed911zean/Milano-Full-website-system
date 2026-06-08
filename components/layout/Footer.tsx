@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRef } from "react";
+import { usePathname } from "next/navigation";
 import { ArrowUpRight, Clock3, MapPin, Phone } from "lucide-react";
 import { FaInstagram, FaFacebookF } from "react-icons/fa";
 import { motion, useInView, type Transition } from "framer-motion";
@@ -18,8 +19,12 @@ const NAVIGATION = [
 const ease: Transition["ease"] = [0.22, 1, 0.36, 1];
 
 export function Footer() {
+  const pathname = usePathname();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
+
+  // Hide footer on product detail pages: /products/<any-segment>
+  if (/^\/products\/[^/]+/.test(pathname)) return null;
 
   return (
     <footer ref={ref} className="relative overflow-hidden bg-bg-base border-t border-white/5 pt-32 pb-12">

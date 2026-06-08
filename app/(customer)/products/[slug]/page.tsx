@@ -5,7 +5,6 @@ import ProductDetailClient from '@/components/sections/ProductDetailClient'
 import type { Category, ProductWithVariants } from '@/lib/supabase/types'
 
 interface Props {
-  // Next.js 15: params بقى async
   params: Promise<{ slug: string }>
 }
 
