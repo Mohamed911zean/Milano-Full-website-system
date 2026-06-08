@@ -95,7 +95,7 @@ export function SpecialCakeCTA() {
                 className="relative z-10 w-full h-full"
               >
                 <Image
-                  src="/eight-season-cake-removebg.png"
+                  src="/kitkat-cake-no-bg.png"
                   alt="كيكة ميلانو الملكية الخاصة"
                   fill
                   className="object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] scale-110"

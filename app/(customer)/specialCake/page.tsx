@@ -9,6 +9,7 @@ import { CheckCircle2, ChevronRight, ChevronLeft, Calendar, Wand2, Sparkles, Quo
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import {submitSpecialCakeOrder } from "@/app/actions/special-cake"
 
 const OCCASIONS = [
   { id: 'Birthday', title: 'عيد ميلاد', image: '/kitkat-cake.jpg', desc: 'احتفل بعام آخر جميل' },
@@ -39,6 +40,7 @@ export default function SpecialCakesPage() {
   const router = useRouter();
   
   const [step, setStep] = useState(0);
+  const [submitting , setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     occasion: '',
     size: '',
@@ -64,10 +66,29 @@ export default function SpecialCakesPage() {
     }, 400); // تأخير بسيط ليلاحظ المستخدم الاختيار
   };
 
-  const handleSubmit = () => {
-    toast.success('تم إرسال طلبك بنجاح!');
-    router.push('/');
-  };
+  const handleSubmit = async () => {
+    setSubmitting(true)
+
+    const result = await submitSpecialCakeOrder({
+      customerPhone: formData.phoneNumber,
+      occasion:      formData.occasion,
+      cakeSize:      formData.size,
+      flavor:        formData.flavor,
+      colorTheme:    formData.colorTheme  || undefined,
+      cakeMessage:   formData.message     || undefined,
+      deliveryDate:  formData.deliveryDate,
+    })
+
+    setSubmitting(false)
+
+    if (!result.success) {
+      toast.error(result.message ?? 'حصل خطأ، حاول تاني')
+      return
+    }
+
+    toast.success('تم إرسال طلبك! سيتواصل معك فريقنا قريباً 🎂')
+    router.push('/')
+  }
 
   const variants: Variants = {
     initial: { opacity: 0, y: 40, filter: 'blur(10px)' },
