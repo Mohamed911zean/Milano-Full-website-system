@@ -203,3 +203,22 @@ main {
   background: rgba(201, 168, 76, 0.25);
   color: var(--color-text-primary);
 }
+
+/* ── Admin Sidebar: Solid backgrounds (no transparency leakage) ── */
+.admin-sidebar,
+.admin-sidebar [data-slot="sidebar-inner"],
+.admin-sidebar [data-sidebar="sidebar"] {
+  background: #0c0c0e !important;
+  color: #ffffff;
+}
+
+.admin-sidebar-section {
+  background: #0c0c0e;
+}
+
+/* Force the Radix Sheet portal content (mobile drawer) to be solid */
+[data-sidebar="sidebar"][data-mobile="true"],
+[data-sidebar="sidebar"][data-mobile="true"] > div {
+  background: #0c0c0e !important;
+  color: #ffffff;
+}
