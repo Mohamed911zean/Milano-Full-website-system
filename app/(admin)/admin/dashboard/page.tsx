@@ -1,76 +1,83 @@
-// app/(admin)/admin/dashboard/page.tsx
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import AdminDashboardClient from './client'
+import DashboardClient from './DashboardClient'
 
-async function getDashboardData() {
+export const dynamic = 'force-dynamic'
+
+async function getOverviewData() {
     const supabase = await createClient()
 
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const todayISO = today.toISOString()
-
     const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
 
+    // Last 7 days for mini-chart
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(today)
+        d.setDate(d.getDate() - (6 - i))
+        return d.toISOString().slice(0, 10)
+    })
+
     const [
-        { data: currentUser },
         { data: staffList },
         { count: totalOrders },
         { count: todayOrders },
-        { data: revenueData },
-        { data: monthRevenueData },
+        { data: allOrders },
+        { data: monthOrders },
         { count: newOrders },
         { count: specialOrders },
         { count: openTickets },
         { data: recentOrders },
-        { data: activityLog },
     ] = await Promise.all([
-        supabase.auth.getUser(),
-        supabase.from('staff_profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('staff_profiles').select('id, is_active'),
         supabase.from('orders').select('*', { count: 'exact', head: true }).neq('status', 'cancelled'),
         supabase.from('orders').select('*', { count: 'exact', head: true }).gte('created_at', todayISO),
-        supabase.from('orders').select('total_price').neq('status', 'cancelled'),
-        supabase.from('orders').select('total_price').neq('status', 'cancelled').gte('created_at', thisMonthStart),
+        supabase.from('orders').select('total_price, status').neq('status', 'cancelled'),
+        supabase.from('orders').select('total_price, created_at').neq('status', 'cancelled').gte('created_at', thisMonthStart),
         supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('special_cake_orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
-        supabase.from('orders').select('id, order_number, customer_name, customer_phone, status, total_price, created_at').order('created_at', { ascending: false }).limit(8),
-        supabase.from('staff_activity_log').select('*, staff:staff_profiles(full_name, role)').order('created_at', { ascending: false }).limit(20),
+        supabase.from('orders')
+            .select('id, order_number, customer_name, customer_phone, status, total_price, created_at')
+            .order('created_at', { ascending: false })
+            .limit(6),
     ])
 
-    const { data: staffData } = await supabase
-        .from('staff_profiles')
-        .select('role, is_active, id')
-        .eq('id', currentUser.user?.id ?? '')
-        .single()
+    const totalRevenue = allOrders?.reduce((s, o) => s + Number(o.total_price ?? 0), 0) ?? 0
+    const monthRevenue = monthOrders?.reduce((s, o) => s + Number(o.total_price ?? 0), 0) ?? 0
 
-    if (!staffData || !['owner', 'super_admin'].includes(staffData.role)) {
-        redirect('/admin/login')
-    }
+    // Build daily revenue for the last 7 days
+    const dailyRevenue = last7Days.map(day => {
+        const dayTotal = monthOrders?.filter(o => o.created_at.slice(0, 10) === day)
+            .reduce((s, o) => s + Number(o.total_price ?? 0), 0) ?? 0
+        return { day: day.slice(5), revenue: dayTotal }
+    })
 
-    const totalRevenue = revenueData?.reduce((s, o) => s + Number(o.total_price ?? 0), 0) ?? 0
-    const monthRevenue = monthRevenueData?.reduce((s, o) => s + Number(o.total_price ?? 0), 0) ?? 0
+    // Status breakdown
+    const statusBreakdown = (allOrders ?? []).reduce((acc, o) => {
+        acc[o.status] = (acc[o.status] ?? 0) + 1
+        return acc
+    }, {} as Record<string, number>)
 
     return {
-        currentUser: { ...currentUser.user, staffData },
         stats: {
-            totalOrders:   totalOrders  ?? 0,
-            todayOrders:   todayOrders  ?? 0,
+            totalOrders:   totalOrders   ?? 0,
+            todayOrders:   todayOrders   ?? 0,
             totalRevenue,
             monthRevenue,
-            newOrders:     newOrders    ?? 0,
+            newOrders:     newOrders     ?? 0,
             specialOrders: specialOrders ?? 0,
-            openTickets:   openTickets  ?? 0,
+            openTickets:   openTickets   ?? 0,
             totalStaff:    staffList?.length ?? 0,
             activeStaff:   staffList?.filter(s => s.is_active).length ?? 0,
         },
-        staffList: staffList ?? [],
+        dailyRevenue,
+        statusBreakdown,
         recentOrders: recentOrders ?? [],
-        activityLog: activityLog ?? [],
     }
 }
 
 export default async function AdminDashboardPage() {
-    const data = await getDashboardData()
-    return <AdminDashboardClient {...data} />
+    const data = await getOverviewData()
+    return <DashboardClient {...data} />
 }
