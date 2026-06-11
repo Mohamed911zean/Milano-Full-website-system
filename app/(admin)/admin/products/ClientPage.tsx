@@ -3,11 +3,12 @@
 import { useState, useMemo, useTransition } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, Filter, Edit, Trash2, Package, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { Plus, Search, Filter, Edit, Trash2, Package, CheckCircle2, XCircle, Loader2, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { adminDeleteProduct, adminToggleProductActive } from '@/app/actions/admin_products'
 import { ProductFormModal } from '@/components/admin/ProductFormModal'
 import type { Category, ProductWithVariants } from '@/lib/supabase/types'
+import * as XLSX from 'xlsx'
 
 export default function ProductsClientPage({ 
     initialProducts, 
@@ -71,6 +72,26 @@ export default function ProductsClientPage({
         })
     }
 
+    const exportToExcel = () => {
+        const data = filteredProducts.map(p => ({
+            'ID': p.id,
+            'القسم': p.category?.name_ar ?? 'بدون قسم',
+            'الاسم بالعربية': p.name_ar,
+            'الاسم بالإنجليزية': p.name_en ?? '-',
+            'السعر الأساسي': p.base_price,
+            'وحدة التسعير': p.pricing_unit,
+            'الحالة': p.is_active ? 'نشط' : 'مخفي',
+            'مميز': p.is_featured ? 'نعم' : 'لا',
+            'عدد الأحجام': p.variants?.length ?? 0,
+            'تاريخ الإضافة': new Date(p.created_at).toLocaleDateString('ar-EG')
+        }))
+
+        const ws = XLSX.utils.json_to_sheet(data)
+        const wb = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(wb, ws, "Products")
+        XLSX.writeFile(wb, "milano_products.xlsx")
+    }
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
             {/* Header */}
@@ -85,11 +106,18 @@ export default function ProductsClientPage({
                     </div>
                 </div>
                 
-                <button onClick={handleCreate}
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-[#c9a84c] text-[#0a0502] rounded-xl text-sm font-bold hover:bg-[#d4b86a] transition-all shadow-[0_0_15px_rgba(201,168,76,0.2)]">
-                    <Plus className="w-4 h-4" />
-                    منتج جديد
-                </button>
+                <div className="flex w-full sm:w-auto gap-2">
+                    <button onClick={exportToExcel}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 text-white rounded-xl text-sm font-bold hover:bg-white/10 transition-all">
+                        <Download className="w-4 h-4" />
+                        تصدير
+                    </button>
+                    <button onClick={handleCreate}
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-[#c9a84c] text-[#0a0502] rounded-xl text-sm font-bold hover:bg-[#d4b86a] transition-all shadow-[0_0_15px_rgba(201,168,76,0.2)]">
+                        <Plus className="w-4 h-4" />
+                        منتج جديد
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}

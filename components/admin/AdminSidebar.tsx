@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
     LayoutDashboard, Users, ShoppingBag, Activity,
-    LogOut, Shield, Package, X, ChevronRight
+    LogOut, Shield, Package, X, ChevronRight, Bell, LayoutGrid
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAdminSidebar } from '@/components/admin/AdminSidebarContext'
@@ -25,7 +25,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 interface AdminSidebarProps {
     currentUser: { email?: string; staffData: { role: string } }
-    notifications: { newOrders: number; openTickets: number }
+    notifications: { newOrders: number }
 }
 
 /* ─────────────────────────────────────────────────────── */
@@ -35,8 +35,10 @@ interface AdminSidebarProps {
 function useNavItems(notifications: AdminSidebarProps['notifications']) {
     return [
         { href: '/admin/dashboard', label: 'نظرة عامة',  icon: LayoutDashboard },
+        { href: '/admin/live-orders', label: 'الطلبات المباشرة', icon: Bell, badge: notifications.newOrders },
+        { href: '/admin/orders',    label: 'الطلبات',     icon: ShoppingBag },
         { href: '/admin/products',  label: 'المنتجات',    icon: Package },
-        { href: '/admin/orders',    label: 'الطلبات',     icon: ShoppingBag, badge: notifications.newOrders },
+        { href: '/admin/categories', label: 'الأقسام', icon: LayoutGrid },
         { href: '/admin/staff',     label: 'الموظفون',    icon: Users },
         { href: '/admin/activity',  label: 'سجل النشاط', icon: Activity },
     ]

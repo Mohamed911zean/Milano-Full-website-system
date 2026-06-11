@@ -23,10 +23,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     // Fetch minimal notifications for Topbar/Sidebar cleanly in parallel
     const [
         { count: newOrders },
-        { count: openTickets },
     ] = await Promise.all([
         supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
-        supabase.from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
     ])
 
     const currentUser = {
@@ -36,7 +34,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
     const notifications = {
         newOrders: newOrders ?? 0,
-        openTickets: openTickets ?? 0
     }
 
     return (

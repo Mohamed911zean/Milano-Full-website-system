@@ -24,7 +24,7 @@ const NAV_LABELS: Record<string, string> = {
 interface Props {
     children: React.ReactNode
     currentUser: { email?: string; staffData: { role: string } }
-    notifications: { newOrders: number; openTickets: number }
+    notifications: { newOrders: number }
 }
 
 function InnerLayout({ children, currentUser, notifications }: Props) {
@@ -32,7 +32,7 @@ function InnerLayout({ children, currentUser, notifications }: Props) {
     const { isOpen, isMobile, toggleDesktop, toggleMobile } = useAdminSidebar()
 
     const pageTitle       = Object.entries(NAV_LABELS).find(([k]) => pathname.startsWith(k))?.[1] ?? 'لوحة التحكم'
-    const totalNotifs     = notifications.newOrders + notifications.openTickets
+    const totalNotifs     = notifications.newOrders
     const hasNewOrders    = notifications.newOrders > 0
 
     return (

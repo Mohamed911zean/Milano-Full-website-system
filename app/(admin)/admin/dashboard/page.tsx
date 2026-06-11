@@ -26,7 +26,6 @@ async function getOverviewData() {
         { data: monthOrders },
         { count: newOrders },
         { count: specialOrders },
-        { count: openTickets },
         { data: recentOrders },
     ] = await Promise.all([
         supabase.from('staff_profiles').select('id, is_active'),
@@ -36,7 +35,6 @@ async function getOverviewData() {
         supabase.from('orders').select('total_price, created_at').neq('status', 'cancelled').gte('created_at', thisMonthStart),
         supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('special_cake_orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
-        supabase.from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
         supabase.from('orders')
             .select('id, order_number, customer_name, customer_phone, status, total_price, created_at')
             .order('created_at', { ascending: false })
@@ -67,7 +65,6 @@ async function getOverviewData() {
             monthRevenue,
             newOrders:     newOrders     ?? 0,
             specialOrders: specialOrders ?? 0,
-            openTickets:   openTickets   ?? 0,
             totalStaff:    staffList?.length ?? 0,
             activeStaff:   staffList?.filter(s => s.is_active).length ?? 0,
         },
