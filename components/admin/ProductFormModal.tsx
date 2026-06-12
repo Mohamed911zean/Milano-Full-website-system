@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef } from 'react'
 import { X, Upload, Loader2, Plus, Trash2, Image as ImageIcon } from 'lucide-react'
 import { adminCreateProduct, adminUpdateProduct } from '@/app/actions/admin_products'
-import { uploadProductImage } from '@/lib/services/products'
+import { uploadProductImage } from '@/lib/utils/uploadImage'
 import { cn } from '@/lib/utils'
 import type { Category, ProductWithVariants } from '@/lib/supabase/types'
 import Image from 'next/image'

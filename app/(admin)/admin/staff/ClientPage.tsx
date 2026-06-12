@@ -44,6 +44,9 @@ export default function StaffClientPage({
             const result = await toggleStaffActive(id, !currentActive)
             if (result.success) {
                 setStaff(prev => prev.map(s => s.id === id ? { ...s, is_active: !currentActive } : s))
+                router.refresh()
+            } else {
+                alert(result.message || 'حدث خطأ أثناء تعديل حالة الموظف')
             }
             setTogglingId(null)
         })

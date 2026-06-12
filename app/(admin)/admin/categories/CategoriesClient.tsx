@@ -170,8 +170,8 @@ export default function CategoriesClient({ initialCategories }: { initialCategor
         startTransition(async () => {
             const res = await adminDeleteCategory(id, name)
             if (!res.success) alert(res.message)
-            setLoadingId(null)
             router.refresh()
+            setLoadingId(null)
         })
     }
 

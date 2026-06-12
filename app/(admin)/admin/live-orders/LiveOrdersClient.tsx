@@ -37,8 +37,9 @@ export default function LiveOrdersClient({ initialOrders }: { initialOrders: any
     const [orders, setOrders] = useState<LiveOrder[]>(initialOrders)
     const [toast, setToast] = useState<{ id: string; message: string; type: 'new' | 'update' } | null>(null)
 
+    const [supabase] = useState(() => createClient())
+
     useEffect(() => {
-        const supabase = createClient()
 
         const channel = supabase
             .channel('live-orders')

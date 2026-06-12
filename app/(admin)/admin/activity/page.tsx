@@ -1,22 +1,34 @@
 import { createClient } from '@/lib/supabase/server'
-import { Activity } from 'lucide-react'
+import { Activity, ChevronRight, ChevronLeft } from 'lucide-react'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-async function getActivityData() {
+async function getActivityData(page: number) {
     const supabase = await createClient()
+    const pageSize = 50
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
 
-    const { data: activityLog } = await supabase
+    const { data: activityLog, count } = await supabase
         .from('staff_activity_log')
-        .select('*, staff:staff_profiles(full_name, role)')
+        .select('*, staff:staff_profiles(full_name, role)', { count: 'exact' })
         .order('created_at', { ascending: false })
-        .limit(50)
+        .range(from, to)
 
-    return activityLog ?? []
+    return { 
+        activityLog: activityLog ?? [], 
+        totalPages: Math.ceil((count ?? 0) / pageSize) 
+    }
 }
 
-export default async function AdminActivityPage() {
-    const activityLog = await getActivityData()
+export default async function AdminActivityPage({
+    searchParams
+}: {
+    searchParams: { page?: string }
+}) {
+    const page = parseInt(searchParams.page ?? '1', 10)
+    const { activityLog, totalPages } = await getActivityData(page)
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
@@ -56,6 +68,28 @@ export default async function AdminActivityPage() {
                     ))
                 )}
             </div>
+
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
+                    {page > 1 ? (
+                        <Link href={`?page=${page - 1}`} className="flex items-center gap-1 text-sm text-white/50 hover:text-white transition-colors">
+                            <ChevronRight className="w-4 h-4" /> السابق
+                        </Link>
+                    ) : (
+                        <div className="w-[70px]"></div>
+                    )}
+                    <span className="text-sm text-white/50 font-mono">
+                        {page} / {totalPages}
+                    </span>
+                    {page < totalPages ? (
+                        <Link href={`?page=${page + 1}`} className="flex items-center gap-1 text-sm text-white/50 hover:text-white transition-colors">
+                            التالي <ChevronLeft className="w-4 h-4" />
+                        </Link>
+                    ) : (
+                        <div className="w-[70px]"></div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

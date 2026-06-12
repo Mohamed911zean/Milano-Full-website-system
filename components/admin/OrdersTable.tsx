@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
-import { Search, Filter, ChevronDown } from 'lucide-react'
+import { Search, Filter, ChevronDown, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { adminUpdateOrderStatus } from '@/app/actions/admin_orders'
 
 export interface Order {
     id: string
@@ -28,10 +30,22 @@ export const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 const ALL_STATUSES = Object.keys(STATUS_LABELS)
 
-export function OrdersTable({ orders }: { orders: Order[] }) {
+export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { orders: Order[], currentPage?: number, totalPages?: number }) {
+    const router = useRouter()
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
     const [showFilter, setShowFilter] = useState(false)
+    const [loadingId, setLoadingId] = useState<string | null>(null)
+
+    const handleStatusUpdate = async (id: string, newStatus: string, orderNumber: string) => {
+        setLoadingId(id)
+        const res = await adminUpdateOrderStatus(id, newStatus, orderNumber)
+        if (!res.success) {
+            alert(res.message)
+        }
+        setLoadingId(null)
+        router.refresh()
+    }
 
     const filtered = useMemo(() => {
         return orders.filter(o => {
@@ -132,9 +146,23 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                                         <p className="text-sm font-medium text-white/80 truncate">{order.customer_name}</p>
                                         <p className="text-[10px] text-white/30 font-mono mt-0.5">{order.customer_phone}</p>
                                     </div>
-                                    <span className={cn('inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold border w-fit', s.color)}>
-                                        {s.label}
-                                    </span>
+                                    <div className="relative w-fit">
+                                        <select
+                                            value={order.status}
+                                            disabled={loadingId === order.id}
+                                            onChange={(e) => handleStatusUpdate(order.id, e.target.value, order.order_number)}
+                                            className={cn('appearance-none pr-3 pl-8 py-1 rounded-full text-[10px] font-bold border outline-none cursor-pointer', s.color)}
+                                        >
+                                            {ALL_STATUSES.map(st => (
+                                                <option key={st} value={st} className="bg-[#1a1a1c] text-white">{STATUS_LABELS[st].label}</option>
+                                            ))}
+                                        </select>
+                                        {loadingId === order.id ? (
+                                            <Loader2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin text-current" />
+                                        ) : (
+                                            <ChevronDown className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-current pointer-events-none" />
+                                        )}
+                                    </div>
                                     <span className="text-sm font-bold text-white/80">{Number(order.total_price).toLocaleString()} ج</span>
                                     <span className="text-[10px] text-white/25">{new Date(order.created_at).toLocaleDateString('ar-EG')}</span>
                                 </div>
@@ -153,9 +181,23 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                                             <p className="text-sm font-bold text-white">{order.customer_name}</p>
                                             <p className="text-xs text-white/40 font-mono mt-0.5">{order.customer_phone}</p>
                                         </div>
-                                        <span className={cn('inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold border shrink-0', s.color)}>
-                                            {s.label}
-                                        </span>
+                                        <div className="relative shrink-0">
+                                            <select
+                                                value={order.status}
+                                                disabled={loadingId === order.id}
+                                                onChange={(e) => handleStatusUpdate(order.id, e.target.value, order.order_number)}
+                                                className={cn('appearance-none pr-3 pl-8 py-1 rounded-full text-[10px] font-bold border outline-none cursor-pointer', s.color)}
+                                            >
+                                                {ALL_STATUSES.map(st => (
+                                                    <option key={st} value={st} className="bg-[#1a1a1c] text-white">{STATUS_LABELS[st].label}</option>
+                                                ))}
+                                            </select>
+                                            {loadingId === order.id ? (
+                                                <Loader2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin text-current" />
+                                            ) : (
+                                                <ChevronDown className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-current pointer-events-none" />
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
                                         <span className="text-xs font-mono text-[#c9a84c]/70">{order.order_number}</span>
@@ -168,6 +210,28 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                             )
                         })}
                     </div>
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between pt-4">
+                            <button
+                                onClick={() => router.push(`?page=${currentPage - 1}`)}
+                                disabled={currentPage <= 1}
+                                className="flex items-center gap-1 text-sm text-white/50 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            >
+                                <ChevronRight className="w-4 h-4" /> السابق
+                            </button>
+                            <span className="text-sm text-white/50 font-mono">
+                                {currentPage} / {totalPages}
+                            </span>
+                            <button
+                                onClick={() => router.push(`?page=${currentPage + 1}`)}
+                                disabled={currentPage >= totalPages}
+                                className="flex items-center gap-1 text-sm text-white/50 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            >
+                                التالي <ChevronLeft className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
                 </>
             )}
         </div>

@@ -166,7 +166,7 @@ export function Navbar() {
             <Link
               href="/account/profile"
               className={cn(
-                'hidden sm:flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-500',
+                'flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-500',
                 isScrolled
                   ? 'border-black/15 text-black hover:border-black/40 hover:bg-black/5'
                   : 'border-white/20 text-white hover:border-white/40 hover:bg-white/5'

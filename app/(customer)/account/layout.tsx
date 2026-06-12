@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { User, ShoppingBag, Settings, LifeBuoy, LogOut } from 'lucide-react';
+import { User, ShoppingBag, Heart, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -12,8 +12,7 @@ import { useRouter } from 'next/navigation';
 const sidebarLinks = [
   { href: '/account/profile', label: 'الملف الشخصي', icon: User },
   { href: '/account/orders', label: 'طلباتي', icon: ShoppingBag },
-  { href: '/account/support', label: 'الدعم الفني', icon: LifeBuoy },
-  { href: '/account/settings', label: 'الإعدادات', icon: Settings },
+  { href: '/account/wishlist', label: 'المفضلة', icon: Heart },
 ];
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {

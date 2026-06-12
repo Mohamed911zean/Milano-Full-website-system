@@ -12,11 +12,16 @@ async function getOverviewData() {
     const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
 
     // Last 7 days for mini-chart
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const last7DaysDates = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(today)
         d.setDate(d.getDate() - (6 - i))
         return d.toISOString().slice(0, 10)
     })
+    
+    // start of 7 days ago
+    const last7DaysStart = new Date(today)
+    last7DaysStart.setDate(last7DaysStart.getDate() - 6)
+    const last7DaysStartISO = last7DaysStart.toISOString()
 
     const [
         { data: staffList },
@@ -24,6 +29,7 @@ async function getOverviewData() {
         { count: todayOrders },
         { data: allOrders },
         { data: monthOrders },
+        { data: last7DaysOrders },
         { count: newOrders },
         { count: specialOrders },
         { data: recentOrders },
@@ -33,6 +39,7 @@ async function getOverviewData() {
         supabase.from('orders').select('*', { count: 'exact', head: true }).gte('created_at', todayISO),
         supabase.from('orders').select('total_price, status').neq('status', 'cancelled'),
         supabase.from('orders').select('total_price, created_at').neq('status', 'cancelled').gte('created_at', thisMonthStart),
+        supabase.from('orders').select('total_price, created_at').neq('status', 'cancelled').gte('created_at', last7DaysStartISO),
         supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('special_cake_orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('orders')
@@ -44,9 +51,9 @@ async function getOverviewData() {
     const totalRevenue = allOrders?.reduce((s, o) => s + Number(o.total_price ?? 0), 0) ?? 0
     const monthRevenue = monthOrders?.reduce((s, o) => s + Number(o.total_price ?? 0), 0) ?? 0
 
-    // Build daily revenue for the last 7 days
-    const dailyRevenue = last7Days.map(day => {
-        const dayTotal = monthOrders?.filter(o => o.created_at.slice(0, 10) === day)
+    // Build daily revenue for the last 7 days from last7DaysOrders
+    const dailyRevenue = last7DaysDates.map(day => {
+        const dayTotal = last7DaysOrders?.filter(o => o.created_at.slice(0, 10) === day)
             .reduce((s, o) => s + Number(o.total_price ?? 0), 0) ?? 0
         return { day: day.slice(5), revenue: dayTotal }
     })

@@ -4,20 +4,28 @@ import { ShoppingBag } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
-async function getOrdersData() {
+async function getOrdersData(page: number) {
     const supabase = await createClient()
+    const pageSize = 50
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
 
-    const { data: orders } = await supabase
+    const { data: orders, count } = await supabase
         .from('orders')
-        .select('id, order_number, customer_name, customer_phone, status, total_price, created_at')
+        .select('id, order_number, customer_name, customer_phone, status, total_price, created_at', { count: 'exact' })
         .order('created_at', { ascending: false })
-        .limit(50) // Showing recent 50 for now, could add pagination
+        .range(from, to)
 
-    return orders ?? []
+    return { orders: orders ?? [], totalPages: Math.ceil((count ?? 0) / pageSize) }
 }
 
-export default async function AdminOrdersPage() {
-    const orders = await getOrdersData()
+export default async function AdminOrdersPage({
+    searchParams
+}: {
+    searchParams: { page?: string }
+}) {
+    const page = parseInt(searchParams.page ?? '1', 10)
+    const { orders, totalPages } = await getOrdersData(page)
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
@@ -31,7 +39,7 @@ export default async function AdminOrdersPage() {
                 </div>
             </div>
 
-            <OrdersTable orders={orders} />
+            <OrdersTable orders={orders} currentPage={page} totalPages={totalPages} />
         </div>
     )
 }

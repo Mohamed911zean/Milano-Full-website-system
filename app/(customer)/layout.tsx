@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/Footer'
 import { CartDrawer } from '@/components/layout/CartDrawer'
 import { LocationModal } from '@/components/layout/LocationModal'
 import { CartProvider } from '@/context/CartContext'
+import { WishlistProvider } from '@/context/WishlistContext'
 import { LocationProvider } from '@/context/LocationContext'
 import { Rouge_Script } from "next/font/google"
 
@@ -36,13 +37,15 @@ export default async function CustomerLayout({
   return (
     <LocationProvider>
       <CartProvider>
-        <Navbar />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-        <CartDrawer />
-        <LocationModal />
+        <WishlistProvider>
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+          <CartDrawer />
+          <LocationModal />
+        </WishlistProvider>
       </CartProvider>
     </LocationProvider>
   )

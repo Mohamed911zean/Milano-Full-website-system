@@ -46,9 +46,27 @@ export default function ProfilePage() {
 
     if (error) {
       alert(error.message);
-    } else {
-      // Show success toast or message
+      setUpdating(false);
+      return;
+    } 
+
+    if (user) {
+      const { error: profileError } = await supabase
+        .from('customer_profiles')
+        .update({
+          full_name: fullName,
+          phone: phone,
+          address: address
+        })
+        .eq('id', user.id);
+
+      if (profileError) {
+        alert("حدث خطأ أثناء تحديث الملف الشخصي");
+      } else {
+        alert("تم تحديث الملف الشخصي بنجاح");
+      }
     }
+    
     setUpdating(false);
   };
 
