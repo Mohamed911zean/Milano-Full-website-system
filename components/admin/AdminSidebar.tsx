@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
     LayoutDashboard, Users, ShoppingBag, Activity,
-    LogOut, Shield, Package, X, ChevronRight, Bell, LayoutGrid
+    LogOut, Shield, Package, X, ChevronRight, Bell, LayoutGrid, TrendingUp
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAdminSidebar } from '@/components/admin/AdminSidebarContext'
@@ -39,6 +39,8 @@ function useNavItems(notifications: AdminSidebarProps['notifications']) {
         { href: '/admin/orders',    label: 'الطلبات',     icon: ShoppingBag },
         { href: '/admin/products',  label: 'المنتجات',    icon: Package },
         { href: '/admin/categories', label: 'الأقسام', icon: LayoutGrid },
+        { href: '/admin/customers', label: 'العملاء', icon: Users },
+        { href: '/admin/best-sellers', label: 'الأكثر مبيعاً', icon: TrendingUp },
         { href: '/admin/staff',     label: 'الموظفون',    icon: Users },
         { href: '/admin/activity',  label: 'سجل النشاط', icon: Activity },
     ]

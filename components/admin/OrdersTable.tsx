@@ -11,6 +11,7 @@ export interface Order {
     order_number: string
     customer_name: string
     customer_phone: string
+    owner_email: string | null
     status: string
     total_price: number
     fulfillment_type?: string
@@ -144,7 +145,10 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                                     <span className="text-xs font-mono text-[#c9a84c]/80 font-bold">{order.order_number}</span>
                                     <div>
                                         <p className="text-sm font-medium text-white/80 truncate">{order.customer_name}</p>
-                                        <p className="text-[10px] text-white/30 font-mono mt-0.5">{order.customer_phone}</p>
+                                        <div className="flex flex-col gap-1 mt-0.5">
+                                            <p className="text-[10px] text-white/30 font-mono">{order.customer_phone}</p>
+                                            {order.owner_email && <p className="text-[10px] text-white/30 truncate">{order.owner_email}</p>}
+                                        </div>
                                     </div>
                                     <div className="relative w-fit">
                                         <select
@@ -179,7 +183,10 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                                     <div className="flex items-start justify-between gap-3">
                                         <div>
                                             <p className="text-sm font-bold text-white">{order.customer_name}</p>
-                                            <p className="text-xs text-white/40 font-mono mt-0.5">{order.customer_phone}</p>
+                                            <div className="flex flex-col gap-1 mt-0.5">
+                                                <p className="text-xs text-white/40 font-mono">{order.customer_phone}</p>
+                                                {order.owner_email && <p className="text-[10px] text-white/30 truncate">{order.owner_email}</p>}
+                                            </div>
                                         </div>
                                         <div className="relative shrink-0">
                                             <select

@@ -12,7 +12,7 @@ async function getOrdersData(page: number) {
 
     const { data: orders, count } = await supabase
         .from('orders')
-        .select('id, order_number, customer_name, customer_phone, status, total_price, created_at', { count: 'exact' })
+        .select('id, order_number, customer_name, customer_phone, customer_email, status, total_price, created_at', { count: 'exact' })
         .order('created_at', { ascending: false })
         .range(from, to)
 
