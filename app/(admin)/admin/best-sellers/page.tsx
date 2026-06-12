@@ -25,10 +25,11 @@ async function getBestSellersData() {
 
     // Get order items for those orders
     const { data: orderItems } = await supabase
-        .from('order_items')
-        .select('product_id, product_name_ar, unit_price, quantity')
-        .in('order_id', orders.map(o => o.id))
+  .from('order_items')
+  .select('product_id, product_name_ar, unit_price, quantity, order_id')  // add order_id here
+  .in('order_id', orders.map(o => o.id))
 
+  
     if (!orderItems || orderItems.length === 0) {
         return {
             allProducts: [],
@@ -65,12 +66,12 @@ async function getBestSellersData() {
                 category_id: product.category_id ?? null,
                 total_quantity_sold: item.quantity,
                 total_revenue: item.unit_price * item.quantity,
-                order_ids: new Set([item.id])
+                order_ids: new Set([item.order.id])
             })
         } else if (existing) {
             existing.total_quantity_sold += item.quantity
             existing.total_revenue += item.unit_price * item.quantity
-            existing.order_ids.add(item.id)
+            existing.order_ids.add(item.order.id)
         }
     })
 

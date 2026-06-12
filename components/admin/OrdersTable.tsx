@@ -5,13 +5,14 @@ import { cn } from '@/lib/utils'
 import { Search, Filter, ChevronDown, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { adminUpdateOrderStatus } from '@/app/actions/admin_orders'
+import Link from 'next/link'
 
 export interface Order {
     id: string
     order_number: string
     customer_name: string
     customer_phone: string
-    owner_email: string | null
+    customer_email: string | null
     status: string
     total_price: number
     fulfillment_type?: string
@@ -31,7 +32,8 @@ export const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 const ALL_STATUSES = Object.keys(STATUS_LABELS)
 
-export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { orders: Order[], currentPage?: number, totalPages?: number }) {
+// تـعـديـل هـنـا: إعطاء orders قيمة افتراضية [] لحماية الشاشة من الانهيار
+export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { orders?: Order[], currentPage?: number, totalPages?: number }) {
     const router = useRouter()
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
@@ -49,19 +51,23 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
     }
 
     const filtered = useMemo(() => {
+        // تـعـديـل هـنـا: التأكد من أن الـ orders مصفوفة قبل عمل الـ filter
+        if (!Array.isArray(orders)) return [];
+        
         return orders.filter(o => {
+            if (!o) return false;
             const matchStatus = statusFilter === 'all' || o.status === statusFilter
             const q = search.toLowerCase()
             const matchSearch = !q
-                || o.customer_name.toLowerCase().includes(q)
-                || o.order_number.toLowerCase().includes(q)
-                || o.customer_phone.includes(q)
+                || (o.customer_name && o.customer_name.toLowerCase().includes(q))
+                || (o.order_number && o.order_number.toLowerCase().includes(q))
+                || (o.customer_phone && o.customer_phone.includes(q))
             return matchStatus && matchSearch
         })
     }, [orders, search, statusFilter])
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4" dir="rtl">
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row gap-3">
                 {/* Search */}
@@ -103,7 +109,7 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                                     <button key={s}
                                         onClick={() => { setStatusFilter(s); setShowFilter(false) }}
                                         className={cn("w-full text-right px-3 py-2 rounded-xl text-sm transition-all", statusFilter === s ? "bg-[#c9a84c]/10 text-[#c9a84c]" : "text-white/50 hover:text-white hover:bg-white/5")}>
-                                        {STATUS_LABELS[s].label}
+                                        {STATUS_LABELS[s]?.label}
                                     </button>
                                 ))}
                             </div>
@@ -147,7 +153,7 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                                         <p className="text-sm font-medium text-white/80 truncate">{order.customer_name}</p>
                                         <div className="flex flex-col gap-1 mt-0.5">
                                             <p className="text-[10px] text-white/30 font-mono">{order.customer_phone}</p>
-                                            {order.owner_email && <p className="text-[10px] text-white/30 truncate">{order.owner_email}</p>}
+                                            {order.customer_email && <p className="text-[10px] text-white/30 truncate">{order.customer_email}</p>}
                                         </div>
                                     </div>
                                     <div className="relative w-fit">
@@ -158,7 +164,7 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                                             className={cn('appearance-none pr-3 pl-8 py-1 rounded-full text-[10px] font-bold border outline-none cursor-pointer', s.color)}
                                         >
                                             {ALL_STATUSES.map(st => (
-                                                <option key={st} value={st} className="bg-[#1a1a1c] text-white">{STATUS_LABELS[st].label}</option>
+                                                <option key={st} value={st} className="bg-[#1a1a1c] text-white">{STATUS_LABELS[st]?.label}</option>
                                             ))}
                                         </select>
                                         {loadingId === order.id ? (
@@ -185,7 +191,7 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                                             <p className="text-sm font-bold text-white">{order.customer_name}</p>
                                             <div className="flex flex-col gap-1 mt-0.5">
                                                 <p className="text-xs text-white/40 font-mono">{order.customer_phone}</p>
-                                                {order.owner_email && <p className="text-[10px] text-white/30 truncate">{order.owner_email}</p>}
+                                                {order.customer_email && <p className="text-[10px] text-white/30 truncate">{order.customer_email}</p>}
                                             </div>
                                         </div>
                                         <div className="relative shrink-0">
@@ -196,7 +202,7 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                                                 className={cn('appearance-none pr-3 pl-8 py-1 rounded-full text-[10px] font-bold border outline-none cursor-pointer', s.color)}
                                             >
                                                 {ALL_STATUSES.map(st => (
-                                                    <option key={st} value={st} className="bg-[#1a1a1c] text-white">{STATUS_LABELS[st].label}</option>
+                                                    <option key={st} value={st} className="bg-[#1a1a1c] text-white">{STATUS_LABELS[st]?.label}</option>
                                                 ))}
                                             </select>
                                             {loadingId === order.id ? (
@@ -207,8 +213,10 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-                                        <span className="text-xs font-mono text-[#c9a84c]/70">{order.order_number}</span>
-                                        <div className="flex items-center gap-3">
+                                            <Link href={`/admin/orders/${order.id}`} className="text-xs font-mono text-[#c9a84c]/80 font-bold hover:text-[#c9a84c] transition-colors hover:underline">
+                                                    {order.order_number}
+                                            </Link>
+                                    <div className="flex items-center gap-3">
                                             <span className="text-sm font-bold text-white">{Number(order.total_price).toLocaleString()} ج</span>
                                             <span className="text-[10px] text-white/30">{new Date(order.created_at).toLocaleDateString('ar-EG')}</span>
                                         </div>
@@ -217,6 +225,7 @@ export function OrdersTable({ orders, currentPage = 1, totalPages = 1 }: { order
                             )
                         })}
                     </div>
+                    
                     {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="flex items-center justify-between pt-4">

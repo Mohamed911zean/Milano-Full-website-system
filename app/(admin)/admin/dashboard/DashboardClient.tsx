@@ -73,7 +73,7 @@ function StatCard({ label, value, sub, icon: Icon, accent, href }: {
     return href ? <Link href={href}>{Inner}</Link> : Inner
 }
 
-export default function DashboardClient({ stats, last30DaysRevenue, last30DaysOrders, topCustomers, bestSellers, newCustomersGrowth, statusBreakdown, recentOrders }: any) {
+export default function DashboardClient({ stats, last30DaysRevenue, last30DaysOrders, topCustomers, bestSellers, newCustomersGrowth, statusBreakdown, recentOrders , orders }: any) {
 
     // Prepare status data for pie chart
     const statusData = Object.entries(statusBreakdown ?? {}).map(([name, value]) => ({
@@ -306,7 +306,7 @@ export default function DashboardClient({ stats, last30DaysRevenue, last30DaysOr
                     </h2>
                     <Link href="/admin/orders" className="text-xs text-[#c9a84c]/70 hover:text-[#c9a84c] transition-colors flex items-center gap-1">عرض الكل <ChevronRight className="w-3 h-3" /></Link>
                 </div>
-                <OrdersTable orders={recentOrders} />
+                    <OrdersTable orders={recentOrders || []} currentPage={1} totalPages={1} />
             </div>
         </div>
     )

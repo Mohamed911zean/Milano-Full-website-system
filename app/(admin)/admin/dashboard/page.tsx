@@ -55,7 +55,7 @@ async function getOverviewData() {
         supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('special_cake_orders').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('orders')
-            .select('id, order_number, customer_name, customer_phone, owner_email, status, total_price, created_at')
+            .select('id, order_number, customer_name, customer_phone, customer_email, status, total_price, created_at')
             .order('created_at', { ascending: false })
             .limit(6),
         supabase.from('customer_profiles').select('id, created_at'),

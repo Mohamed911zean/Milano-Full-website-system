@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState , useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { TrendingUp, Filter, Calendar, ChevronDown, ChevronRight, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -26,8 +26,14 @@ export default function BestSellersClient({ allProducts, categories }: BestSelle
     const [categoryFilter, setCategoryFilter] = useState<string>('all')
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
 
-    // Note: For now, we'll filter on client (all data; later we can do server-side filtering
-    const filteredProducts = allProducts
+    // Note: For now, we'll filter on client (all data; later we can do server-side filtering-- old commit
+const filteredProducts = useMemo(() => {
+  if (categoryFilter === 'all') return allProducts
+  const selectedCat = categories.find(c => c.id === categoryFilter)
+  if (!selectedCat) return allProducts
+  return allProducts.filter(p => p.category_name_ar === selectedCat.name_ar)
+}, [allProducts, categoryFilter, categories])
+
 
     const getDateRangeOptions = [
         { id: 'today', label: 'اليوم' },
