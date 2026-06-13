@@ -66,12 +66,12 @@ async function getBestSellersData() {
                 category_id: product.category_id ?? null,
                 total_quantity_sold: item.quantity,
                 total_revenue: item.unit_price * item.quantity,
-                order_ids: new Set([item.order.id])
+                order_ids: new Set([item.order_id])
             })
         } else if (existing) {
             existing.total_quantity_sold += item.quantity
             existing.total_revenue += item.unit_price * item.quantity
-            existing.order_ids.add(item.order.id)
+            existing.order_ids.add(item.order_id)
         }
     })
 

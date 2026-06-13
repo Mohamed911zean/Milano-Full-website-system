@@ -1,6 +1,8 @@
+// app/(admin)/admin/activity/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { Activity, ChevronRight, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,9 +18,9 @@ async function getActivityData(page: number) {
         .order('created_at', { ascending: false })
         .range(from, to)
 
-    return { 
-        activityLog: activityLog ?? [], 
-        totalPages: Math.ceil((count ?? 0) / pageSize) 
+    return {
+        activityLog: activityLog ?? [],
+        totalPages: Math.ceil((count ?? 0) / pageSize)
     }
 }
 
@@ -27,6 +29,21 @@ export default async function AdminActivityPage({
 }: {
     searchParams: { page?: string }
 }) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) redirect('/admin/login')
+
+    // 🔒 operations ممنوع من هنا
+    const { data: staff } = await supabase
+        .from('staff_profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (!staff || !['owner', 'super_admin'].includes(staff.role)) {
+        redirect('/admin/dashboard')
+    }
+
     const page = parseInt(searchParams.page ?? '1', 10)
     const { activityLog, totalPages } = await getActivityData(page)
 
@@ -59,8 +76,8 @@ export default async function AdminActivityPage({
                             </div>
                             <div className="flex items-center h-10">
                                 <p className="text-xs text-white/25 whitespace-nowrap bg-white/5 px-3 py-1.5 rounded-lg border border-white/[0.02]">
-                                    {new Date(log.created_at).toLocaleString('ar-EG', { 
-                                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                                    {new Date(log.created_at).toLocaleString('ar-EG', {
+                                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                                     })}
                                 </p>
                             </div>
@@ -75,19 +92,13 @@ export default async function AdminActivityPage({
                         <Link href={`?page=${page - 1}`} className="flex items-center gap-1 text-sm text-white/50 hover:text-white transition-colors">
                             <ChevronRight className="w-4 h-4" /> السابق
                         </Link>
-                    ) : (
-                        <div className="w-[70px]"></div>
-                    )}
-                    <span className="text-sm text-white/50 font-mono">
-                        {page} / {totalPages}
-                    </span>
+                    ) : <div className="w-[70px]" />}
+                    <span className="text-sm text-white/50 font-mono">{page} / {totalPages}</span>
                     {page < totalPages ? (
                         <Link href={`?page=${page + 1}`} className="flex items-center gap-1 text-sm text-white/50 hover:text-white transition-colors">
                             التالي <ChevronLeft className="w-4 h-4" />
                         </Link>
-                    ) : (
-                        <div className="w-[70px]"></div>
-                    )}
+                    ) : <div className="w-[70px]" />}
                 </div>
             )}
         </div>

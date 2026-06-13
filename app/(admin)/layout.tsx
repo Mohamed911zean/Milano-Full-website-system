@@ -1,3 +1,4 @@
+// app/(admin)/layout.tsx
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminLayoutClient from '@/components/admin/AdminLayoutClient'
@@ -12,15 +13,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
     const { data: staff } = await supabase
         .from('staff_profiles')
-        .select('role, is_active')
+        .select('role, is_active, full_name')
         .eq('id', user.id)
         .single()
 
-    if (!staff || !staff.is_active || !['owner', 'super_admin'].includes(staff.role)) {
+    // ✅ السماح لـ owner و super_admin و operations
+    if (!staff || !staff.is_active || !['owner', 'super_admin', 'operations'].includes(staff.role)) {
         redirect('/admin/login')
     }
 
-    // Fetch minimal notifications for Topbar/Sidebar cleanly in parallel
     const [
         { count: newOrders },
     ] = await Promise.all([

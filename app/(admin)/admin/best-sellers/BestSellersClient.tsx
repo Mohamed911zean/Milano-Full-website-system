@@ -10,6 +10,7 @@ interface BestSellerProduct {
     name_ar: string | null
     name_en: string | null
     base_price: number
+    category_id: string | null
     category_name_ar: string | null
     total_quantity_sold: number
     total_revenue: number
@@ -29,10 +30,8 @@ export default function BestSellersClient({ allProducts, categories }: BestSelle
     // Note: For now, we'll filter on client (all data; later we can do server-side filtering-- old commit
 const filteredProducts = useMemo(() => {
   if (categoryFilter === 'all') return allProducts
-  const selectedCat = categories.find(c => c.id === categoryFilter)
-  if (!selectedCat) return allProducts
-  return allProducts.filter(p => p.category_name_ar === selectedCat.name_ar)
-}, [allProducts, categoryFilter, categories])
+  return allProducts.filter(p => p.category_id === categoryFilter)
+}, [allProducts, categoryFilter])
 
 
     const getDateRangeOptions = [

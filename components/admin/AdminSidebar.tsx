@@ -1,3 +1,4 @@
+// components/admin/AdminSidebar.tsx
 'use client'
 
 import { useCallback } from 'react'
@@ -10,10 +11,6 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { useAdminSidebar } from '@/components/admin/AdminSidebarContext'
 
-/* ─────────────────────────────────────────────────────── */
-/*  Constants                                              */
-/* ─────────────────────────────────────────────────────── */
-
 const SIDEBAR_BG    = '#0d0d0f'
 const SIDEBAR_WIDTH = '272px'
 
@@ -24,31 +21,24 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 interface AdminSidebarProps {
-    currentUser: { email?: string; staffData: { role: string } }
+    currentUser: { email?: string; staffData: { role: string; full_name?: string } }
     notifications: { newOrders: number }
 }
 
-/* ─────────────────────────────────────────────────────── */
-/*  Nav items                                              */
-/* ─────────────────────────────────────────────────────── */
-
-function useNavItems(notifications: AdminSidebarProps['notifications']) {
-    return [
-        { href: '/admin/dashboard', label: 'نظرة عامة',  icon: LayoutDashboard },
-        { href: '/admin/live-orders', label: 'الطلبات المباشرة', icon: Bell, badge: notifications.newOrders },
-        { href: '/admin/orders',    label: 'الطلبات',     icon: ShoppingBag },
-        { href: '/admin/products',  label: 'المنتجات',    icon: Package },
-        { href: '/admin/categories', label: 'الأقسام', icon: LayoutGrid },
-        { href: '/admin/customers', label: 'العملاء', icon: Users },
-        { href: '/admin/best-sellers', label: 'الأكثر مبيعاً', icon: TrendingUp },
-        { href: '/admin/staff',     label: 'الموظفون',    icon: Users },
-        { href: '/admin/activity',  label: 'سجل النشاط', icon: Activity },
-    ]
-}
-
-/* ─────────────────────────────────────────────────────── */
-/*  Inner sidebar content (shared desktop + mobile)        */
-/* ─────────────────────────────────────────────────────── */
+// ✅ كل item بيحدد مين يقدر يشوفه
+// لو مفيش allowedRoles → الكل يشوفه
+const ALL_NAV_ITEMS = [
+    { href: '/admin/dashboard',    label: 'نظرة عامة',         icon: LayoutDashboard, allowedRoles: ['owner', 'super_admin', 'operations'] },
+    { href: '/admin/live-orders',  label: 'الطلبات المباشرة',  icon: Bell,            allowedRoles: ['owner', 'super_admin', 'operations'], badgeKey: 'newOrders' },
+    { href: '/admin/orders',       label: 'الطلبات',            icon: ShoppingBag,     allowedRoles: ['owner', 'super_admin', 'operations'] },
+    { href: '/admin/products',     label: 'المنتجات',           icon: Package,         allowedRoles: ['owner', 'super_admin', 'operations'] },
+    { href: '/admin/categories',   label: 'الأقسام',            icon: LayoutGrid,      allowedRoles: ['owner', 'super_admin', 'operations'] },
+    { href: '/admin/customers',    label: 'العملاء',            icon: Users,           allowedRoles: ['owner', 'super_admin', 'operations'] },
+    { href: '/admin/best-sellers', label: 'الأكثر مبيعاً',     icon: TrendingUp,      allowedRoles: ['owner', 'super_admin', 'operations'] },
+    // 🔒 محظور على operations
+    { href: '/admin/staff',        label: 'الموظفون',           icon: Users,           allowedRoles: ['owner', 'super_admin'] },
+    { href: '/admin/activity',     label: 'سجل النشاط',        icon: Activity,        allowedRoles: ['owner', 'super_admin'] },
+]
 
 function SidebarContent({
     currentUser,
@@ -58,7 +48,15 @@ function SidebarContent({
     const router   = useRouter()
     const pathname = usePathname()
     const supabase = createClient()
-    const navItems = useNavItems(notifications)
+    const role     = currentUser.staffData.role
+
+    // فلترة الـ nav items حسب الـ role
+    const navItems = ALL_NAV_ITEMS
+        .filter(item => item.allowedRoles.includes(role))
+        .map(item => ({
+            ...item,
+            badge: item.badgeKey === 'newOrders' ? notifications.newOrders : undefined
+        }))
 
     const handleLogout = useCallback(async () => {
         onClose?.()
@@ -67,16 +65,9 @@ function SidebarContent({
     }, [router, supabase, onClose])
 
     return (
-        <div
-            style={{ background: SIDEBAR_BG }}
-            className="flex flex-col h-full w-full select-none"
-        >
-            {/* ── Header ── */}
-            <div
-                style={{ borderBottom: '1px solid rgba(201,168,76,0.12)' }}
-                className="flex items-center gap-3 px-5 py-4 shrink-0"
-            >
-                {/* Logo icon */}
+        <div style={{ background: SIDEBAR_BG }} className="flex flex-col h-full w-full select-none">
+            {/* Header */}
+            <div style={{ borderBottom: '1px solid rgba(201,168,76,0.12)' }} className="flex items-center gap-3 px-5 py-4 shrink-0">
                 <div
                     style={{
                         background: 'linear-gradient(135deg, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.05) 100%)',
@@ -87,30 +78,37 @@ function SidebarContent({
                     <Shield className="w-5 h-5 text-[#c9a84c]" />
                 </div>
 
-                {/* Brand name */}
                 <div className="flex-1 min-w-0">
                     <p className="text-[15px] font-bold text-white leading-tight tracking-wide">Milano</p>
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#c9a84c] opacity-80 mt-0.5">
-                        Admin Panel
+                        {role === 'operations' ? 'Operations Panel' : 'Admin Panel'}
                     </p>
                 </div>
 
-                {/* Close btn — only shown as part of mobile header overlay */}
                 {onClose && (
                     <button
                         onClick={onClose}
                         aria-label="إغلاق القائمة"
                         style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
-                        className="w-9 h-9 rounded-xl flex items-center justify-center text-white/60
-                                   hover:text-white hover:bg-white/10 transition-all duration-150 active:scale-95 shrink-0"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all duration-150 active:scale-95 shrink-0"
                     >
                         <X className="w-4 h-4" />
                     </button>
                 )}
             </div>
 
-            {/* ── Nav ── */}
-            <nav className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-1">
+            {/* Role badge للـ operations */}
+            {role === 'operations' && (
+                <div className="mx-3 mt-3 px-3 py-2 rounded-xl"
+                     style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
+                    <p className="text-[10px] text-blue-400 font-bold text-center">
+                        وصول موظف العمليات
+                    </p>
+                </div>
+            )}
+
+            {/* Nav */}
+            <nav className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-1 mt-1">
                 {navItems.map((item) => {
                     const isActive = pathname.startsWith(item.href)
                     return (
@@ -126,30 +124,16 @@ function SidebarContent({
                                 background: 'transparent',
                                 border: '1px solid transparent',
                             }}
-                            className={`
-                                flex items-center gap-3.5 px-4 rounded-xl h-[50px]
-                                transition-all duration-200 group
-                                ${isActive
-                                    ? 'text-[#c9a84c]'
-                                    : 'text-white/65 hover:text-white hover:bg-white/[0.055] hover:border-white/[0.08]'
-                                }
-                            `}
+                            className={`flex items-center gap-3.5 px-4 rounded-xl h-[50px] transition-all duration-200 group ${
+                                isActive ? 'text-[#c9a84c]' : 'text-white/65 hover:text-white hover:bg-white/[0.055] hover:border-white/[0.08]'
+                            }`}
                         >
-                            {/* Icon */}
-                            <item.icon
-                                className={`w-[18px] h-[18px] shrink-0 transition-colors duration-200
-                                    ${isActive ? 'text-[#c9a84c]' : 'text-white/45 group-hover:text-white/75'}`}
-                            />
-
-                            {/* Label */}
+                            <item.icon className={`w-[18px] h-[18px] shrink-0 transition-colors duration-200 ${
+                                isActive ? 'text-[#c9a84c]' : 'text-white/45 group-hover:text-white/75'
+                            }`} />
                             <span className="font-semibold text-[13.5px] flex-1">{item.label}</span>
-
-                            {/* Badge */}
                             {item.badge ? (
-                                <span
-                                    style={{ background: '#3b82f6' }}
-                                    className="text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center"
-                                >
+                                <span style={{ background: '#3b82f6' }} className="text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
                                     {item.badge > 99 ? '99+' : item.badge}
                                 </span>
                             ) : isActive ? (
@@ -160,20 +144,12 @@ function SidebarContent({
                 })}
             </nav>
 
-            {/* ── Footer ── */}
-            <div
-                style={{ borderTop: '1px solid rgba(201,168,76,0.10)' }}
-                className="p-4 space-y-3 shrink-0"
-            >
-                {/* User card */}
+            {/* Footer */}
+            <div style={{ borderTop: '1px solid rgba(201,168,76,0.10)' }} className="p-4 space-y-3 shrink-0">
                 <div
-                    style={{
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.07)',
-                    }}
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
                     className="flex items-center gap-3 px-3 py-3 rounded-xl"
                 >
-                    {/* Avatar */}
                     <div
                         style={{
                             background: 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.06))',
@@ -184,28 +160,17 @@ function SidebarContent({
                         {currentUser.email?.[0]?.toUpperCase() ?? 'U'}
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[12px] text-white/85 font-semibold truncate leading-tight">
-                            {currentUser.email}
-                        </p>
+                        <p className="text-[12px] text-white/85 font-semibold truncate leading-tight">{currentUser.email}</p>
                         <p className="text-[10px] text-[#c9a84c] font-semibold mt-0.5 opacity-90">
-                            {ROLE_LABELS[currentUser.staffData.role] ?? currentUser.staffData.role}
+                            {ROLE_LABELS[role] ?? role}
                         </p>
                     </div>
                 </div>
 
-                {/* Logout */}
                 <button
                     onClick={handleLogout}
-                    style={{
-                        background: 'rgba(239,68,68,0.08)',
-                        border: '1px solid rgba(239,68,68,0.18)',
-                    }}
-                    className="
-                        w-full flex items-center justify-center gap-2.5 px-3 py-3 rounded-xl
-                        text-[13px] font-bold text-red-400
-                        hover:bg-red-500/15 hover:border-red-500/28 hover:text-red-300
-                        transition-all duration-200 active:scale-[0.98]
-                    "
+                    style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)' }}
+                    className="w-full flex items-center justify-center gap-2.5 px-3 py-3 rounded-xl text-[13px] font-bold text-red-400 hover:bg-red-500/15 hover:border-red-500/28 hover:text-red-300 transition-all duration-200 active:scale-[0.98]"
                 >
                     <LogOut className="w-4 h-4" />
                     <span>تسجيل الخروج</span>
@@ -215,14 +180,9 @@ function SidebarContent({
     )
 }
 
-/* ─────────────────────────────────────────────────────── */
-/*  Main export                                            */
-/* ─────────────────────────────────────────────────────── */
-
 export default function AdminSidebar(props: AdminSidebarProps) {
     const { isOpen, isMobileOpen, isMobile, closeMobile } = useAdminSidebar()
 
-    /* ── Desktop sidebar ── */
     if (!isMobile) {
         return (
             <aside
@@ -244,10 +204,8 @@ export default function AdminSidebar(props: AdminSidebarProps) {
         )
     }
 
-    /* ── Mobile drawer ── */
     return (
         <>
-            {/* Backdrop */}
             <div
                 onClick={closeMobile}
                 aria-hidden="true"
@@ -260,17 +218,13 @@ export default function AdminSidebar(props: AdminSidebarProps) {
                     pointerEvents: isMobileOpen ? 'auto' : 'none',
                 }}
             />
-
-            {/* Drawer panel */}
             <div
                 role="dialog"
                 aria-modal="true"
                 aria-label="Admin Navigation"
                 style={{
                     position: 'fixed',
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
+                    top: 0, right: 0, bottom: 0,
                     zIndex: 50,
                     width: '85vw',
                     maxWidth: SIDEBAR_WIDTH,
