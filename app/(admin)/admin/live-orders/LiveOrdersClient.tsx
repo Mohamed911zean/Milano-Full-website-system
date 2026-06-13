@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ShoppingBag, Bell, Package, CheckCircle2, Clock, MapPin, XCircle, Users } from 'lucide-react'
+import { ShoppingBag, Bell, Package, Clock, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface LiveOrder {
@@ -33,11 +34,20 @@ const STATUS_LABELS_AR: Record<string, string> = {
     picked_up: 'استُلم', cancelled: 'ملغي',
 }
 
-export default function LiveOrdersClient({ initialOrders }: { initialOrders: any[] }) {
+export default function LiveOrdersClient({ initialOrders }: { initialOrders: LiveOrder[] }) {
     const [orders, setOrders] = useState<LiveOrder[]>(initialOrders)
     const [toast, setToast] = useState<{ id: string; message: string; type: 'new' | 'update' } | null>(null)
 
     const [supabase] = useState(() => createClient())
+
+    const showToast = useCallback((id: string, message: string, type: 'new' | 'update') => {
+        setToast({ id, message, type })
+        setTimeout(() => setToast(null), 4000)
+    }, [])
+
+    const removeHighlight = useCallback((id: string) => {
+        setOrders(prev => prev.map(o => o.id === id ? { ...o, isNewEvent: false } : o))
+    }, [])
 
     useEffect(() => {
 
@@ -68,16 +78,7 @@ export default function LiveOrdersClient({ initialOrders }: { initialOrders: any
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [])
-
-    const showToast = (id: string, message: string, type: 'new' | 'update') => {
-        setToast({ id, message, type })
-        setTimeout(() => setToast(null), 4000)
-    }
-
-    const removeHighlight = (id: string) => {
-        setOrders(prev => prev.map(o => o.id === id ? { ...o, isNewEvent: false } : o))
-    }
+    }, [removeHighlight, showToast, supabase])
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
@@ -98,10 +99,11 @@ export default function LiveOrdersClient({ initialOrders }: { initialOrders: any
             {/* Live Orders Feed */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {orders.map((order) => (
-                    <div 
+                    <Link
+                        href={`/admin/orders/${order.id}`}
                         key={order.id} 
                         className={cn(
-                            "relative overflow-hidden bg-[#111113] border rounded-2xl p-4 transition-all duration-500",
+                            "relative overflow-hidden bg-[#111113] border rounded-2xl p-4 transition-all duration-500 block",
                             order.isNewEvent 
                                 ? "border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.15)] -translate-y-1" 
                                 : "border-white/[0.06] hover:border-white/10"
@@ -135,7 +137,7 @@ export default function LiveOrdersClient({ initialOrders }: { initialOrders: any
                                 <span className="font-bold tabular-nums">{Number(order.total_price).toLocaleString()} ج</span>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
 

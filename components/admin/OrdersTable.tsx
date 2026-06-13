@@ -3,9 +3,9 @@
 import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { Search, Filter, ChevronDown, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { adminUpdateOrderStatus } from '@/app/actions/admin_orders'
-import Link from 'next/link'
 
 export interface Order {
     id: string
@@ -32,7 +32,6 @@ export const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 const ALL_STATUSES = Object.keys(STATUS_LABELS)
 
-// تـعـديـل هـنـا: إعطاء orders قيمة افتراضية [] لحماية الشاشة من الانهيار
 export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { orders?: Order[], currentPage?: number, totalPages?: number }) {
     const router = useRouter()
     const [search, setSearch] = useState('')
@@ -51,7 +50,6 @@ export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { 
     }
 
     const filtered = useMemo(() => {
-        // تـعـديـل هـنـا: التأكد من أن الـ orders مصفوفة قبل عمل الـ filter
         if (!Array.isArray(orders)) return [];
         
         return orders.filter(o => {
@@ -62,6 +60,7 @@ export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { 
                 || (o.customer_name && o.customer_name.toLowerCase().includes(q))
                 || (o.order_number && o.order_number.toLowerCase().includes(q))
                 || (o.customer_phone && o.customer_phone.includes(q))
+                || (o.customer_email && o.customer_email.toLowerCase().includes(q))
             return matchStatus && matchSearch
         })
     }, [orders, search, statusFilter])
@@ -144,10 +143,13 @@ export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { 
                         {filtered.map((order, i) => {
                             const s = STATUS_LABELS[order.status] ?? { label: order.status, color: 'bg-white/5 text-white/40 border-white/10' }
                             return (
-                                <div key={order.id}
-                                     className={cn('grid grid-cols-[160px_1fr_130px_100px_90px] gap-3 px-5 py-4 items-center hover:bg-white/[0.02] transition-colors',
-                                         i < filtered.length - 1 && 'border-b border-white/[0.03]'
-                                     )}>
+                                <Link 
+                                    key={order.id}
+                                    href={`/admin/orders/${order.id}`}
+                                    className={cn('grid grid-cols-[160px_1fr_130px_100px_90px] gap-3 px-5 py-4 items-center hover:bg-white/[0.02] transition-colors',
+                                        i < filtered.length - 1 && 'border-b border-white/[0.03]'
+                                    )}
+                                >
                                     <span className="text-xs font-mono text-[#c9a84c]/80 font-bold">{order.order_number}</span>
                                     <div>
                                         <p className="text-sm font-medium text-white/80 truncate">{order.customer_name}</p>
@@ -156,7 +158,7 @@ export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { 
                                             {order.customer_email && <p className="text-[10px] text-white/30 truncate">{order.customer_email}</p>}
                                         </div>
                                     </div>
-                                    <div className="relative w-fit">
+                                    <div className="relative w-fit" onClick={(e) => e.preventDefault()}>
                                         <select
                                             value={order.status}
                                             disabled={loadingId === order.id}
@@ -175,7 +177,7 @@ export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { 
                                     </div>
                                     <span className="text-sm font-bold text-white/80">{Number(order.total_price).toLocaleString()} ج</span>
                                     <span className="text-[10px] text-white/25">{new Date(order.created_at).toLocaleDateString('ar-EG')}</span>
-                                </div>
+                                </Link>
                             )
                         })}
                     </div>
@@ -185,7 +187,11 @@ export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { 
                         {filtered.map(order => {
                             const s = STATUS_LABELS[order.status] ?? { label: order.status, color: 'bg-white/5 text-white/40 border-white/10' }
                             return (
-                                <div key={order.id} className="bg-[#111113] border border-white/[0.06] rounded-2xl p-4 space-y-3">
+                                <Link 
+                                    key={order.id}
+                                    href={`/admin/orders/${order.id}`}
+                                    className="bg-[#111113] border border-white/[0.06] rounded-2xl p-4 space-y-3 block"
+                                >
                                     <div className="flex items-start justify-between gap-3">
                                         <div>
                                             <p className="text-sm font-bold text-white">{order.customer_name}</p>
@@ -194,7 +200,7 @@ export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { 
                                                 {order.customer_email && <p className="text-[10px] text-white/30 truncate">{order.customer_email}</p>}
                                             </div>
                                         </div>
-                                        <div className="relative shrink-0">
+                                        <div className="relative shrink-0" onClick={(e) => e.preventDefault()}>
                                             <select
                                                 value={order.status}
                                                 disabled={loadingId === order.id}
@@ -213,15 +219,13 @@ export function OrdersTable({ orders = [], currentPage = 1, totalPages = 1 }: { 
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-                                            <Link href={`/admin/orders/${order.id}`} className="text-xs font-mono text-[#c9a84c]/80 font-bold hover:text-[#c9a84c] transition-colors hover:underline">
-                                                    {order.order_number}
-                                            </Link>
-                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs font-mono text-[#c9a84c]/80">{order.order_number}</span>
+                                        <div className="flex items-center gap-3">
                                             <span className="text-sm font-bold text-white">{Number(order.total_price).toLocaleString()} ج</span>
                                             <span className="text-[10px] text-white/30">{new Date(order.created_at).toLocaleDateString('ar-EG')}</span>
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             )
                         })}
                     </div>

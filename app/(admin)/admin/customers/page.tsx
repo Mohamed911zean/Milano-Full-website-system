@@ -6,67 +6,28 @@ export const dynamic = 'force-dynamic'
 async function getCustomersData() {
   const supabase = await createClient()
 
-  // =========================
-  // Customer Profiles
-  // =========================
-  const {
-  data: customerProfiles,
-  error: profileError
-} = await supabase
-  .from('customer_profiles')
-  .select('*')
-  .order('created_at', { ascending: false })
-console.log('PROFILE ERROR:', profileError)
-console.log('PROFILE DATA:', customerProfiles)
-    
+  const { data: customerProfiles, error: profileError } = await supabase
+    .from('customer_profiles')
+    .select('id, full_name, email, phone, address, created_at')
+    .order('created_at', { ascending: false })
 
   if (profileError) {
-    console.error('CUSTOMER PROFILES ERROR:', profileError)
-
     throw new Error(
       `Failed to fetch customer profiles: ${profileError.message}`
     )
   }
 
-  // =========================
-  // Orders
-  // =========================
-  const {
-    data: orders,
-    error: ordersError
-  } = await supabase
+  const { data: orders, error: ordersError } = await supabase
     .from('orders')
     .select('user_id, total_price, created_at, status')
     .neq('status', 'cancelled')
 
   if (ordersError) {
-    console.error('ORDERS ERROR:', ordersError)
-
     throw new Error(
       `Failed to fetch orders: ${ordersError.message}`
     )
   }
 
-  // =========================
-  // Debug Logs
-  // =========================
-  console.log('====================')
-  console.log('CUSTOMER PROFILES:', customerProfiles?.length ?? 0)
-  console.log('ORDERS:', orders?.length ?? 0)
-
-  if (customerProfiles?.length) {
-    console.log('FIRST CUSTOMER:', customerProfiles[0])
-  }
-
-  if (orders?.length) {
-    console.log('FIRST ORDER:', orders[0])
-  }
-
-  console.log('====================')
-
-  // =========================
-  // Analytics
-  // =========================
   const allCustomers = (customerProfiles ?? []).map(profile => {
     const customerOrders =
       orders?.filter(order => order.user_id === profile.id) ?? []
@@ -80,7 +41,7 @@ console.log('PROFILE DATA:', customerProfiles)
 
     const lastOrderDate =
       customerOrders.length > 0
-        ? customerOrders.sort(
+        ? [...customerOrders].sort(
             (a, b) =>
               new Date(b.created_at).getTime() -
               new Date(a.created_at).getTime()
@@ -98,18 +59,6 @@ console.log('PROFILE DATA:', customerProfiles)
   const customersWithOrders = allCustomers
     .filter(customer => customer.total_orders > 0)
     .sort((a, b) => b.total_revenue - a.total_revenue)
-
-  console.log('ALL CUSTOMERS:', allCustomers.length)
-  console.log('CUSTOMERS WITH ORDERS:', customersWithOrders.length)
-
-  if (
-    allCustomers.length > 0 &&
-    customersWithOrders.length === 0
-  ) {
-    console.warn(
-      'WARNING: Customers exist but none are matching orders. Check orders.user_id and customer_profiles.id relationship.'
-    )
-  }
 
   return {
     allCustomers,

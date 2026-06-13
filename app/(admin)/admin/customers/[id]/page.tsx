@@ -3,9 +3,9 @@ import CustomerDetailsClient from './CustomerDetailsClient'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CustomerDetailsPage({ params }: { params: { id: string } }) {
+export default async function CustomerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
-  const customerId = params.id
+  const {id : customerId} = await params
 
   // Get customer profile
   const { data: profile } = await supabase
