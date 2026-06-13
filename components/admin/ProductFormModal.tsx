@@ -5,7 +5,7 @@ import { X, Upload, Loader2, Plus, Trash2, Image as ImageIcon } from 'lucide-rea
 import { adminCreateProduct, adminUpdateProduct } from '@/app/actions/admin_products'
 import { uploadProductImage } from '@/lib/utils/uploadImage'
 import { cn } from '@/lib/utils'
-import type { Category, ProductWithVariants } from '@/lib/supabase/types'
+import type { Category, ProductWithVariants, PricingUnit, PreparationType } from '@/lib/supabase/types'
 import Image from 'next/image'
 
 interface ProductFormModalProps {
@@ -191,7 +191,7 @@ export function ProductFormModal({ product, categories, onClose, onSuccess }: Pr
                             </div>
                             <div>
                                 <label className="text-xs text-white/40 uppercase tracking-widest font-medium block mb-1.5">وحدة التسعير</label>
-                                <select value={form.pricingUnit} onChange={e => setForm(p => ({ ...p, pricingUnit: e.target.value }))}
+                                <select value={form.pricingUnit} onChange={e => setForm(p => ({ ...p, pricingUnit: e.target.value as PricingUnit }))}
                                         className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-sm text-white focus:border-[#c9a84c]/40 outline-none transition-all [&>option]:bg-[#1a1a1c]">
                                     <option value="per_item">بالقطعة</option>
                                     <option value="per_dozen">بالدستة</option>
@@ -205,7 +205,7 @@ export function ProductFormModal({ product, categories, onClose, onSuccess }: Pr
                         <div className="grid grid-cols-2 gap-4 border-t border-white/[0.06] pt-6">
                             <div>
                                 <label className="text-xs text-white/40 uppercase tracking-widest font-medium block mb-1.5">نوع التجهيز</label>
-                                <select value={form.preparationType} onChange={e => setForm(p => ({ ...p, preparationType: e.target.value }))}
+                                <select value={form.preparationType} onChange={e => setForm(p => ({ ...p, preparationType: e.target.value as PreparationType }))}
                                         className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-sm text-white focus:border-[#c9a84c]/40 outline-none transition-all [&>option]:bg-[#1a1a1c]">
                                     <option value="ready_made">جاهز للاستلام</option>
                                     <option value="made_to_order">يُجهز بالطلب</option>

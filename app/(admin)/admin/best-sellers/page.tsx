@@ -78,6 +78,7 @@ async function getBestSellersData() {
     // Convert map to array and sort by quantity sold descending
     let allProducts = Array.from(productMap.values()).map(p => ({
         ...p,
+        name_en: productsById.get(p.id)?.name_en ?? null,
         total_orders: p.order_ids.size,
         category_name_ar: productsById.get(p.id)?.categories?.name_ar ?? null
     })).sort((a, b) => b.total_quantity_sold - a.total_quantity_sold)

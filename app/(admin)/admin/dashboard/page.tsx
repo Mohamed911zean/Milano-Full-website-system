@@ -110,8 +110,10 @@ async function getOverviewData(isOwner: boolean) {
             existing.quantity += item.quantity
             existing.revenue += item.quantity * item.unit_price
         } else {
+            // In Supabase, relations are sometimes arrays, check both possibilities
+            const product = Array.isArray(item.products) ? item.products[0] : item.products
             productSalesMap.set(item.product_id, {
-                name: item.products?.name_ar ?? 'منتج',
+                name: product?.name_ar ?? 'منتج',
                 quantity: item.quantity,
                 revenue: item.quantity * item.unit_price
             })

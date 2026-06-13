@@ -74,7 +74,7 @@ export async function getWishlistProducts() {
 
   // 2. تبسيط الفلترة (علاقة المفضلة بالمنتج هي 1-to-1، فالمنتج هيرجع كـ Object مش Array)
   return data
-    .map(item => item.products)
+    .map(item => Array.isArray(item.products) ? item.products[0] : item.products)
     // التأكد إن المنتج مش null (بسبب الـ RLS) وإنه is_active
     .filter(product => product && product.is_active === true);
 }

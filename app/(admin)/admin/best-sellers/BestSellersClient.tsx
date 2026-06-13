@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 interface BestSellerProduct {
     id: string
     name_ar: string | null
-    name_en: string | null
+    name_en?: string | null
     base_price: number
     category_id: string | null
     category_name_ar: string | null
